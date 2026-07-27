@@ -9,6 +9,7 @@ import com.mastermarisa.maid_restaurant.client.gui.screen.cook_request.elements.
 import com.mastermarisa.maid_restaurant.client.gui.screen.cook_request.elements.UICookRequest;
 import com.mastermarisa.maid_restaurant.request.CookRequest;
 import com.mastermarisa.maid_restaurant.request.CookRequestHandler;
+import com.mastermarisa.maid_restaurant.utils.TaskDataKeys;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.gui.Font;
@@ -38,7 +39,8 @@ public class CookRequestScreen extends Screen {
         initRequests();
         band = new UIImage(UIConst.bandImage);
         band.setCenter(getScreenCenterX(),getScreenCenterY() - 35);
-        acceptValueButton = new UIChangeAcceptValueButton(CookRequest.TYPE,maid.getUUID(),maid.getData(CookRequestHandler.TYPE));
+        acceptValueButton = new UIChangeAcceptValueButton(
+                CookRequest.TYPE, maid.getUUID(), TaskDataKeys.getOrCreate(maid, CookRequestHandler.TYPE));
         acceptValueButton.setCenter(band.getMinX() - 10,band.getCenterY() + 43);
     }
 
@@ -83,7 +85,7 @@ public class CookRequestScreen extends Screen {
             close();
             return false;
         }
-        handler = maid.getData(CookRequestHandler.TYPE);
+        handler = TaskDataKeys.getOrCreate(maid, CookRequestHandler.TYPE);
         return true;
     }
 

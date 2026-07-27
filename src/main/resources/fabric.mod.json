@@ -37,7 +37,6 @@
   },
   "suggests": {
     "patchouli": "*",
-    "farmersdelight": "*",
-    "bakeries": "*"
+    "farmersdelight": "*"
   }
 }

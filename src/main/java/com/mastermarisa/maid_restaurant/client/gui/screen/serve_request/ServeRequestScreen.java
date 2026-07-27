@@ -7,6 +7,7 @@ import com.mastermarisa.maid_restaurant.client.gui.screen.cook_request.elements.
 import com.mastermarisa.maid_restaurant.client.gui.screen.cook_request.elements.UICookRequest;
 import com.mastermarisa.maid_restaurant.client.gui.screen.serve_request.elements.UIServeRequest;
 import com.mastermarisa.maid_restaurant.request.ServeRequestHandler;
+import com.mastermarisa.maid_restaurant.utils.TaskDataKeys;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.gui.Font;
@@ -55,7 +56,7 @@ public class ServeRequestScreen extends Screen {
             close();
             return false;
         }
-        handler = maid.getData(ServeRequestHandler.TYPE);
+        handler = TaskDataKeys.getOrCreate(maid, ServeRequestHandler.TYPE);
         return true;
     }
 

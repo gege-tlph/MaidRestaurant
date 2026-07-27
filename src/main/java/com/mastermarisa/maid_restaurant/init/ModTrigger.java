@@ -8,5 +8,6 @@ public final class ModTrigger {
             new RegistryRef<>(new GivePatchouliBookConfigTrigger());
 
     public static void register() {
+        // Calling this method initializes the login-reward trigger holder.
     }
 }

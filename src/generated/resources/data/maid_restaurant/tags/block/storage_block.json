@@ -1,18 +1,6 @@
 {
   "values": [
     "minecraft:chest",
-    "minecraft:barrel",
-    {
-      "id" : "create:belt",
-      "required": false
-    },
-    {
-      "id" : "create:depot",
-      "required": false
-    },
-    {
-      "id" : "create:item_vault",
-      "required": false
-    }
+    "minecraft:barrel"
   ]
 }

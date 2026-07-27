@@ -25,12 +25,14 @@ public class RequestManager {
     public static @Nullable IRequest peek(EntityMaid maid, int type) {
         switch (type) {
             case CookRequest.TYPE -> {
-                return maid.getData(CookRequestHandler.TYPE).getFirst();
+                return TaskDataKeys.getOrCreate(maid, CookRequestHandler.TYPE).getFirst();
             }
             case ServeRequest.TYPE -> {
-                ServeRequest request = maid.getData(ServeRequestHandler.TYPE).getFirst();
+                ServeRequestHandler handler = TaskDataKeys.getOrCreate(maid, ServeRequestHandler.TYPE);
+                ServeRequest request = handler.getFirst();
                 if (request != null && request.toServe.getCount() <= 0) {
-                    maid.getData(ServeRequestHandler.TYPE).removeFirst();
+                    handler.removeFirst();
+                    maid.setAndSyncData(ServeRequestHandler.TYPE, handler);
                     return peek(maid, ServeRequest.TYPE);
                 }
                 return request;
@@ -42,10 +44,16 @@ public class RequestManager {
     public static @Nullable IRequest pop(EntityMaid maid, int type) {
         switch (type) {
             case CookRequest.TYPE -> {
-                return maid.getData(CookRequestHandler.TYPE).removeFirst();
+                CookRequestHandler handler = TaskDataKeys.getOrCreate(maid, CookRequestHandler.TYPE);
+                CookRequest request = handler.removeFirst();
+                maid.setAndSyncData(CookRequestHandler.TYPE, handler);
+                return request;
             }
             case ServeRequest.TYPE -> {
-                return maid.getData(ServeRequestHandler.TYPE).removeFirst();
+                ServeRequestHandler handler = TaskDataKeys.getOrCreate(maid, ServeRequestHandler.TYPE);
+                ServeRequest request = handler.removeFirst();
+                maid.setAndSyncData(ServeRequestHandler.TYPE, handler);
+                return request;
             }
         }
         return null;
@@ -69,14 +77,16 @@ public class RequestManager {
         for (var request : handler.toList()) {
             BlockPos pos = EncodeUtils.decode(request.targets[0]);
             List<EntityMaid> cookers = MaidTracker.maids.stream().filter(maid -> maid.getTask() instanceof TaskCook).filter(m-> {
-                CookRequestHandler requests = m.getData(CookRequestHandler.TYPE);
+                CookRequestHandler requests = TaskDataKeys.getOrCreate(m, CookRequestHandler.TYPE);
                 return requests.accept && requests.size() < 7 && pos.distSqr(m.blockPosition()) <= Math.pow(MAX_RANGE, 2.0D);
             }).toList();
             if (!cookers.isEmpty()) {
                 cookers = new ArrayList<>(cookers);
                 Collections.shuffle(cookers);
                 EntityMaid target = cookers.getFirst();
-                target.getData(CookRequestHandler.TYPE).add(request);
+                CookRequestHandler requests = TaskDataKeys.getOrCreate(target, CookRequestHandler.TYPE);
+                requests.add(request);
+                target.setAndSyncData(CookRequestHandler.TYPE, requests);
                 toRemove.add(request);
             }
         }
@@ -92,18 +102,19 @@ public class RequestManager {
         for (var request : handler.toList()) {
             BlockPos pos = request.targets.getFirst();
             List<EntityMaid> waiters = MaidTracker.maids.stream().filter(maid -> maid.getTask() instanceof TaskWaiter).filter(m-> {
-                ServeRequestHandler requests = m.getData(ServeRequestHandler.TYPE);
+                ServeRequestHandler requests = TaskDataKeys.getOrCreate(m, ServeRequestHandler.TYPE);
                 return requests.size() < 5 && pos.distSqr(m.blockPosition()) <= Math.pow(MAX_RANGE,2.0D);
             }).toList();
             if (!waiters.isEmpty()) {
                 waiters = new ArrayList<>(waiters);
                 Collections.shuffle(waiters);
                 EntityMaid waiter = waiters.getFirst();
-                ServeRequestHandler serveRequestHandler = waiter.getData(ServeRequestHandler.TYPE);
+                ServeRequestHandler serveRequestHandler = TaskDataKeys.getOrCreate(waiter, ServeRequestHandler.TYPE);
                 serveRequestHandler.add(request);
                 serveRequestHandler.toList().forEach(serveRequest -> {
-                    serveRequest.targets.forEach(p -> BlockUsageManager.addUser(p,waiter.getUUID()));
+                        serveRequest.targets.forEach(p -> BlockUsageManager.addUser(p,waiter.getUUID()));
                 });
+                waiter.setAndSyncData(ServeRequestHandler.TYPE, serveRequestHandler);
                 toRemove.add(request);
             }
         }

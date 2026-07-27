@@ -14,6 +14,7 @@ import com.mastermarisa.maid_restaurant.utils.Debug;
 import com.mastermarisa.maid_restaurant.utils.EncodeUtils;
 import com.mastermarisa.maid_restaurant.utils.RequestManager;
 import com.mastermarisa.maid_restaurant.utils.RecipeAccess;
+import com.mastermarisa.maid_restaurant.utils.TaskDataKeys;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -207,9 +208,10 @@ public class NetworkHandler {
     private static void handleModifyAttributesOnServer(ModifyAttributePayload payload, ServerPlayer player) {
         ServerLevel level = (ServerLevel) player.level();
         if (level.getEntity(payload.uuid()) instanceof EntityMaid maid) {
-            CookRequestHandler handler = maid.getData(CookRequestHandler.TYPE);
+            CookRequestHandler handler = TaskDataKeys.getOrCreate(maid, CookRequestHandler.TYPE);
             if (handler.size() > payload.index()) {
                 Objects.requireNonNull(handler.getAt(payload.index())).attributes.setAttributes(payload.attributes());
+                maid.setAndSyncData(CookRequestHandler.TYPE, handler);
             }
         }
     }
@@ -219,12 +221,12 @@ public class NetworkHandler {
         if (level.getEntity(payload.uuid()) instanceof EntityMaid maid) {
             switch (payload.actionCode()) {
                 case 0 -> {
-                    CookRequestHandler handler = maid.getData(CookRequestHandler.TYPE);
+                    CookRequestHandler handler = TaskDataKeys.getOrCreate(maid, CookRequestHandler.TYPE);
                     handler.removeAt(payload.index());
                     maid.setAndSyncData(CookRequestHandler.TYPE, handler);
                 }
                 case 1 -> {
-                    ServeRequestHandler handler = maid.getData(ServeRequestHandler.TYPE);
+                    ServeRequestHandler handler = TaskDataKeys.getOrCreate(maid, ServeRequestHandler.TYPE);
                     handler.removeAt(payload.index());
                     maid.setAndSyncData(ServeRequestHandler.TYPE, handler);
                 }
@@ -237,12 +239,12 @@ public class NetworkHandler {
         if (level.getEntity(payload.uuid()) instanceof EntityMaid maid) {
             switch (payload.t()) {
                 case 0 -> {
-                    CookRequestHandler handler = maid.getData(CookRequestHandler.TYPE);
+                    CookRequestHandler handler = TaskDataKeys.getOrCreate(maid, CookRequestHandler.TYPE);
                     handler.accept = payload.value();
                     maid.setAndSyncData(CookRequestHandler.TYPE, handler);
                 }
                 case 1 -> {
-                    ServeRequestHandler handler = maid.getData(ServeRequestHandler.TYPE);
+                    ServeRequestHandler handler = TaskDataKeys.getOrCreate(maid, ServeRequestHandler.TYPE);
                     handler.accept = payload.value();
                     maid.setAndSyncData(ServeRequestHandler.TYPE, handler);
                 }

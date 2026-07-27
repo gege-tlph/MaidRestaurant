@@ -8,6 +8,7 @@ import com.mastermarisa.maid_restaurant.network.NetworkHandler;
 import com.mastermarisa.maid_restaurant.network.OpenScreenPayload;
 import com.mastermarisa.maid_restaurant.request.CookRequestHandler;
 import com.mastermarisa.maid_restaurant.request.ServeRequestHandler;
+import com.mastermarisa.maid_restaurant.utils.TaskDataKeys;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.minecraft.world.InteractionResult;
 
@@ -21,14 +22,16 @@ public final class MaidScreenOpening {
                     || !player.getItemInHand(hand).is(ModItems.ORDER_MENU.get())) {
                 return InteractionResult.PASS;
             }
-            CookRequestHandler cook = maid.getOrCreateData(CookRequestHandler.TYPE, new CookRequestHandler());
-            ServeRequestHandler serve = maid.getOrCreateData(ServeRequestHandler.TYPE, new ServeRequestHandler());
+            CookRequestHandler cook = TaskDataKeys.getOrCreate(maid, CookRequestHandler.TYPE);
+            ServeRequestHandler serve = TaskDataKeys.getOrCreate(maid, ServeRequestHandler.TYPE);
             if (maid.getTask() instanceof TaskCook) {
+                maid.setAndSyncData(CookRequestHandler.TYPE, cook);
                 NetworkHandler.sendToPlayer((net.minecraft.server.level.ServerPlayer) player,
                         new OpenScreenPayload(0, maid.getId()));
                 return InteractionResult.SUCCESS;
             }
             if (maid.getTask() instanceof TaskWaiter && serve.size() > 0) {
+                maid.setAndSyncData(ServeRequestHandler.TYPE, serve);
                 NetworkHandler.sendToPlayer((net.minecraft.server.level.ServerPlayer) player,
                         new OpenScreenPayload(1, maid.getId()));
                 return InteractionResult.SUCCESS;

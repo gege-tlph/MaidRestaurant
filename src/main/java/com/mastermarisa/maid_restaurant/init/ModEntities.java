@@ -36,5 +36,6 @@ public final class ModEntities {
     }
 
     public static void register() {
+        // Calling this method initializes the static Fabric registry entries.
     }
 }

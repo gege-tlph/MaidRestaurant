@@ -2,7 +2,6 @@ package com.mastermarisa.maid_restaurant.item;
 
 import com.mastermarisa.maid_restaurant.init.ModDataComponents;
 import com.mastermarisa.maid_restaurant.maid.TaskWaiter;
-import com.mastermarisa.maid_restaurant.utils.component.BlockSelection;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
@@ -21,7 +20,7 @@ public class OrderItem extends Item {
     }
 
     public static boolean hasRequests(ItemStack stack) {
-        return false;
+        return Boolean.TRUE.equals(stack.get(ModDataComponents.ORDER_ITEM_HAS_REQUESTS));
     }
 
     public InteractionResult useOn(UseOnContext context) {

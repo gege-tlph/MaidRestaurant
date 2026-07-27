@@ -2,10 +2,11 @@
 
 Branch: `port/1.21.11-fabric`
 
-This is a migration baseline, not a feature-complete release. The common
-gameplay layer, client screen/render layer, and Farmers Delight Refabricated
-compatibility compile and package successfully, while Bakeries compatibility
-remains isolated.
+The Fabric 1.21.11 migration is implemented for the retained upstream feature
+set. The common gameplay layer, client screen/render layer, Farmers Delight
+Refabricated compatibility, and optional Patchouli integration compile and
+package successfully, while Bakeries compatibility is explicitly archived.
+Release sign-off still requires the in-world manual verification listed below.
 
 ## Verified baseline
 
@@ -59,6 +60,8 @@ renderer initialization. The development account emits expected Mojang/Realms
   the common initializer for dedicated-server safety.
 - TLM extension registration uses the `little_maid_extension` entrypoint and
   TLM `TaskDataKey` registration.
+- The TLM task-enable callback is registered through its Fabric event, and
+  request-handler defaults plus queue mutations use explicit task-data sync.
 - Player/world transient state uses Fabric data attachments.
 - TLM's relocated item-handler API is used for maid inventories. Adapters
   preserve compatibility with list-backed Kaleidoscope inventories and the
@@ -80,22 +83,24 @@ renderer initialization. The development account emits expected Mojang/Realms
 - Common maid cook/waiter task logic
 - Pot, stockpot, and steamer integration for Kaleidoscope Cookery
 - Farmers Delight Refabricated cooking-pot compatibility
+- Optional Patchouli guide-book recipe, loot data, and login delivery
 - Request/task data serialization and Fabric networking payloads
 - Client ordering/cook/serve screens and their open-screen payload routes
 - Sitting entity renderer and selected-table world indicators
+- Tools & Utilities creative-tab entries for both addon items
 - Common Mixins
 
 ## Intentionally isolated
 
-The following source set is excluded in `build.gradle` until its target API is
-verified:
+The following compatibility source is stored outside the active source set
+because it is explicitly archived:
 
-- `compat/bakeries/**`
+- `archive/bakeries/src/**` (see `archive/bakeries/README.md`)
 
-They must not be treated as removed features. Restore each exclusion only
-after that module compiles and its behavior can be tested.
+The adapters remain available for historical reference and are not part of the
+active 1.21.11 build.
 
-## Known behavior gaps
+## Behavior and validation notes
 
 - The client ordering/cook/serve screens now compile against the 1.21.11
   input and `GuiGraphics` APIs, and server-authoritative payloads route to
@@ -105,23 +110,22 @@ after that module compiles and its behavior can be tested.
   id/count snapshot on `CookRequest`, which the client card renders directly.
   This keeps recipe lookup server-authoritative while preserving the existing
   screen behavior.
-- `GivePatchouliBookConfigTrigger` is a no-op. Patchouli availability is
-  verified, but the book reward flow still needs a Fabric implementation.
-- `ICookTask` default recipe ingredient/result methods are temporary safe
-  defaults. Every cook task that depends on those defaults must be audited;
-  successful compilation is not evidence of correct recipe behavior.
-- `RestaurantConfig` currently uses static defaults and has no persisted
-  Fabric configuration backend.
-- Data generation providers are placeholders.
-- `OrderItem.hasRequests` remains a placeholder, so its 1.21.11 item definition
-  currently selects the no-requests model until request recording is restored.
+- `RestaurantConfig` now persists `sit_while_cooking` and
+  `give_patchouli_book` in `config/maid_restaurant.json`.
+- Patchouli book delivery is implemented as an optional Fabric-side login
+  reward and uses the registered `patchouli:book` data component.
+- Fabric datagen now has a real entrypoint and writes the 1.21.11 item-model
+  definitions plus the block/item tags to its configured output directory.
+- `OrderItem` now has a persisted/networked request-state component; no gameplay
+  producer currently attaches that component, so the default item remains the
+  no-requests model.
 - Farmers Delight Refabricated 3.4.9 has an upstream 1.21.11 client-startup
   defect: its bundled early-riser does not add
   `FARMERSDELIGHT_COOKING`, although the client initializer validates it.
   A client-only compatibility Mixin handles that discarded validation result
   and allows the full modpack to reach the main menu.
 
-## Next verification gates
+## Manual release verification
 
 1. Exercise the migrated client screens in-world, including table selection,
    open-screen payloads, request result snapshots, and world indicators.
@@ -129,9 +133,10 @@ after that module compiles and its behavior can be tested.
    then continue dedicated-server world testing.
 3. Exercise order creation, request distribution, maid cooking, serving,
    save/reload, and multiplayer synchronization.
-4. Port Bakeries only when a verified Fabric 1.21.11 artifact/API is present.
-5. Replace configuration, Patchouli reward, item request recording, and
-   data-generation placeholders.
+4. Keep Bakeries archived unless a verified Fabric 1.21.11 artifact/API is
+   intentionally reintroduced.
+5. Add a gameplay producer for the order-state component if the Order Item
+   becomes a live request carrier.
 
 ## Evidence sources
 

@@ -4,6 +4,8 @@ import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import com.mastermarisa.maid_restaurant.maid.TaskWaiter;
 import com.mastermarisa.maid_restaurant.request.ServeRequestHandler;
 import com.mastermarisa.maid_restaurant.utils.BlockUsageManager;
+import com.mastermarisa.maid_restaurant.request.CookRequestHandler;
+import com.mastermarisa.maid_restaurant.utils.TaskDataKeys;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 
 import java.util.ArrayList;
@@ -19,10 +21,11 @@ public final class MaidTracker {
         ServerEntityEvents.ENTITY_LOAD.register((entity, world) -> {
             if (entity instanceof EntityMaid maid) {
                 maids.add(maid);
+                TaskDataKeys.getOrCreate(maid, CookRequestHandler.TYPE);
+                ServeRequestHandler serveHandler = TaskDataKeys.getOrCreate(maid, ServeRequestHandler.TYPE);
                 if (maid.getTask() instanceof TaskWaiter) {
-                    maid.getOrCreateData(ServeRequestHandler.TYPE, new ServeRequestHandler())
-                            .toList().forEach(request ->
-                                    request.targets.forEach(pos -> BlockUsageManager.addUser(pos, maid.getUUID())));
+                    serveHandler.toList().forEach(request ->
+                            request.targets.forEach(pos -> BlockUsageManager.addUser(pos, maid.getUUID())));
                 }
             }
         });
@@ -30,7 +33,7 @@ public final class MaidTracker {
             if (entity instanceof EntityMaid maid) {
                 maids.remove(maid);
                 if (maid.getTask() instanceof TaskWaiter) {
-                    maid.getOrCreateData(ServeRequestHandler.TYPE, new ServeRequestHandler())
+                    TaskDataKeys.getOrCreate(maid, ServeRequestHandler.TYPE)
                             .toList().forEach(request ->
                                     request.targets.forEach(pos -> BlockUsageManager.removeUser(pos, maid.getUUID())));
                 }

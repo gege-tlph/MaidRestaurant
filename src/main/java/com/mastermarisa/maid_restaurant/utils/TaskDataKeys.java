@@ -1,9 +1,12 @@
 package com.mastermarisa.maid_restaurant.utils;
 
 import cn.sh1rocu.touhoulittlemaid.api.entity.data.TaskDataKey;
+import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
 
+import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -13,6 +16,8 @@ import java.util.function.Supplier;
  * entries owned by EntityMaid.
  */
 public final class TaskDataKeys {
+    private static final Map<TaskDataKey<?>, Supplier<?>> DEFAULTS = new IdentityHashMap<>();
+
     private TaskDataKeys() {
     }
 
@@ -20,7 +25,7 @@ public final class TaskDataKeys {
                                              Function<T, CompoundTag> writer,
                                              Function<CompoundTag, T> reader) {
         Identifier id = Identifier.fromNamespaceAndPath("maid_restaurant", path);
-        return new TaskDataKey<>() {
+        TaskDataKey<T> key = new TaskDataKey<>() {
             @Override
             public Identifier getKey() {
                 return id;
@@ -36,5 +41,17 @@ public final class TaskDataKeys {
                 return reader.apply(compound);
             }
         };
+        DEFAULTS.put(key, factory);
+        return key;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T getOrCreate(EntityMaid maid, TaskDataKey<T> key) {
+        Supplier<T> factory = (Supplier<T>) DEFAULTS.get(key);
+        if (factory == null) {
+            throw new IllegalArgumentException("No default factory registered for " + key.getKey());
+        }
+        T current = maid.getData(key);
+        return current != null ? current : maid.getOrCreateData(key, factory.get());
     }
 }

@@ -51,6 +51,7 @@ loom {
             name = "Data Generation"
             vmArg("-Dfabric-api.datagen")
             vmArg("-Dfabric-api.datagen.modid=${project.mod_id}")
+            vmArg("-Dfabric-api.datagen.output-dir=${project.projectDir}/build/datagen/generated")
             runDir("build/datagen")
         }
     }
@@ -60,11 +61,6 @@ sourceSets {
     main {
         resources {
             srcDir "src/generated/resources"
-        }
-        java {
-            // Bakeries has no verified 1.21.11 Fabric artifact in the shared
-            // workspace yet; its NeoForge-only adapters stay staged separately.
-            exclude "com/mastermarisa/maid_restaurant/compat/bakeries/**"
         }
     }
 }
@@ -87,6 +83,16 @@ dependencies {
     }
 
     modCompileOnly("vazkii.patchouli:Patchouli:1.21.11-94.1-FABRIC") {
+        transitive = false
+    }
+    // Patchouli's published POM pins a newer loader than this Loom toolchain
+    // and would otherwise put two Fabric Loader versions on the dev runtime.
+    // Keep the POM dependencies out, then expose its bundled Fiber version
+    // explicitly because Loom does not put nested jars on this dev classpath.
+    modLocalRuntime("vazkii.patchouli:Patchouli:1.21.11-94.1-FABRIC") {
+        transitive = false
+    }
+    modLocalRuntime("me.zeroeightsix:fiber:0.23.0-2") {
         transitive = false
     }
     modCompileOnly "maven.modrinth:kaleidoscope-cookery-refabricated:1.3.0.9-fabric+mc1.21.11"
