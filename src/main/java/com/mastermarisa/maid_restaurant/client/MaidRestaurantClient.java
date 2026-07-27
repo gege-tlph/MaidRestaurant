@@ -12,7 +12,7 @@ public final class MaidRestaurantClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         ClientPlayNetworking.registerGlobalReceiver(OpenScreenPayload.TYPE,
-                (payload, context) -> context.client().execute(() -> OpenScreenPayload.handle(payload)));
+                (payload, context) -> context.client().execute(() -> ClientOpenScreenHandler.handle(payload)));
         com.mastermarisa.maid_restaurant.client.event.ClientSetup.register();
     }
 }

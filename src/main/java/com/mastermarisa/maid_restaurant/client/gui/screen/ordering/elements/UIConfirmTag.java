@@ -12,7 +12,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import com.mastermarisa.maid_restaurant.network.NetworkHandler;
+import com.mastermarisa.maid_restaurant.client.ClientNetworkHandler;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -91,7 +91,7 @@ public class UIConfirmTag extends UIElement {
 
         public UIStockingModeButton() {
             super(new Rectangle(16,16), (button) -> ((UIStockingModeButton)button).trigger(), 0);
-            disabled = new UIItemStack(new ItemStack(ModItems.TABLE_OAK.get()));
+            disabled = new UIItemStack(new ItemStack(ModItems.TABLE_OAK));
             insertable = new UIItemStack(new ItemStack(Items.HOPPER));
             spaceEnough = new UIItemStack(new ItemStack(Items.CHEST));
             disabled.tooltip.add(Component.translatable("gui.maid_restaurant.cook_request.stocking_mode_unlimited"));
@@ -166,7 +166,7 @@ public class UIConfirmTag extends UIElement {
             }
 
             SendOrderPayload payload = new SendOrderPayload(recipeIDs,recipeTypes,counts,tables,attributes);
-            NetworkHandler.sendToServer(payload);
+            ClientNetworkHandler.sendToServer(payload);
 
             screen.close();
         }

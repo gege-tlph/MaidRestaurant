@@ -3,9 +3,9 @@
 Branch: `port/1.21.11-fabric`
 
 This is a migration baseline, not a feature-complete release. The common
-gameplay layer and Farmers Delight Refabricated compatibility compile and
-package successfully, while the client GUI/rendering layer and Bakeries
-compatibility remain isolated.
+gameplay layer, client screen layer, and Farmers Delight Refabricated
+compatibility compile and package successfully, while world rendering and
+Bakeries compatibility remain isolated.
 
 ## Verified baseline
 
@@ -72,7 +72,6 @@ not accepted automatically, so world creation and gameplay were not started.
 The following source sets are excluded in `build.gradle` until their target
 APIs are verified:
 
-- `client/gui/**`
 - `client/render/**`
 - `compat/bakeries/**`
 
@@ -81,11 +80,12 @@ after that module compiles and its behavior can be tested.
 
 ## Known behavior gaps
 
-- `OpenScreenPayload.handle` is currently a no-op; restaurant screens do not
-  open until the GUI migration is restored.
 - `ClientSetup` and render-stage integration are placeholders.
-- `OrderMenuItem` does not open its original screen while the GUI layer is
-  isolated.
+- The client ordering/cook/serve screens now compile against the 1.21.11
+  input and `GuiGraphics` APIs, and the open-screen payload routes to them.
+- The ordering screen cannot yet resolve a recipe by identifier through the
+  public client recipe API, so a cook-request card currently uses an empty
+  result icon until a server-sent result field is added.
 - `GivePatchouliBookConfigTrigger` is a no-op. Patchouli availability is
   verified, but the book reward flow still needs a Fabric implementation.
 - `ICookTask` default recipe ingredient/result methods are temporary safe

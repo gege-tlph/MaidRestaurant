@@ -10,6 +10,7 @@ import com.mastermarisa.maid_restaurant.client.gui.screen.cook_request.elements.
 import com.mastermarisa.maid_restaurant.request.CookRequest;
 import com.mastermarisa.maid_restaurant.request.CookRequestHandler;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -50,18 +51,18 @@ public class CookRequestScreen extends Screen {
     }
 
     @Override
-    public void resize(Minecraft minecraft, int width, int height) {
-        super.resize(minecraft, width, height);
+    public void resize(int width, int height) {
+        super.resize(width, height);
         band.setCenter(getScreenCenterX(),getScreenCenterY() - 35);
         initRequests();
         acceptValueButton.setCenter(band.getMinX() - 10,band.getCenterY() + 43);
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        UIElement.onMouseClicked(container,mouseX,mouseY,button);
-        UIElement.onMouseClicked(acceptValueButton,mouseX,mouseY,button);
-        return super.mouseClicked(mouseX, mouseY, button);
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        UIElement.onMouseClicked(container,event.x(),event.y(),event.button());
+        UIElement.onMouseClicked(acceptValueButton,event.x(),event.y(),event.button());
+        return super.mouseClicked(event, doubleClick);
     }
 
     public void initRequests() {

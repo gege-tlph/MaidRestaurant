@@ -21,7 +21,9 @@ public class UIItemStack extends UIElement {
 
     public UIItemStack(Ingredient ingredient) {
         super(new Rectangle(16, 16));
-        this.itemStack = new ItemStack(ingredient.getItems()[0].getItem());
+        this.itemStack = ingredient.items().findFirst()
+                .map(holder -> new ItemStack(holder.value()))
+                .orElse(ItemStack.EMPTY);
     }
 
     protected void render(GuiGraphics graphics, int mouseX, int mouseY) {

@@ -8,10 +8,9 @@ import com.mastermarisa.maid_restaurant.client.gui.screen.cook_request.elements.
 import com.mastermarisa.maid_restaurant.client.gui.screen.serve_request.ServeRequestScreen;
 import com.mastermarisa.maid_restaurant.network.CancelRequestPayload;
 import com.mastermarisa.maid_restaurant.request.ServeRequest;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
-import com.mastermarisa.maid_restaurant.network.NetworkHandler;
+import com.mastermarisa.maid_restaurant.client.ClientNetworkHandler;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.awt.*;
@@ -39,7 +38,7 @@ public class UIServeRequest extends UIElement {
         this.part3 = new UIImage(UIConst.basket_3);
         this.item = new UIItemStack(request.toServe);
         this.arrow = new UIImage(UIConst.arrowBrightImage);
-        this.tables = new UIItemStackWithCount(new ItemStack(ModItems.TABLE_OAK.get(), request.targets.size()));
+        this.tables = new UIItemStackWithCount(new ItemStack(ModItems.TABLE_OAK, request.targets.size()));
         this.bubble = new UIImage(UIConst.bubble);
         this.count = new UILabel(request.requested - request.toServe.getCount() + "/" + request.requested, UILabel.TextAlignment.CENTER, Color.WHITE, true);
         btn = new UICancelRequestButton(index,screen);
@@ -50,57 +49,17 @@ public class UIServeRequest extends UIElement {
     protected void render(GuiGraphics graphics, int mouseX, int mouseY) {
         super.render(graphics, mouseX, mouseY);
         this.resize();
-        PoseStack poseStack = graphics.pose();
-
-        poseStack.pushPose();
-        poseStack.translate(0.0F, 0.0F, 100.0F);
         UIElement.render(graphics, part1, mouseX, mouseY);
-        poseStack.popPose();
-
-        poseStack.pushPose();
-        poseStack.translate(0.0F, 0.0F, 200.0F);
         graphics.renderItem(item.itemStack, item.getMinX(), item.getMinY());
-        poseStack.popPose();
-
-        poseStack.pushPose();
-        poseStack.translate(0.0F, 0.0F, 300.0F);
         UIElement.render(graphics, part2, mouseX, mouseY);
-        poseStack.popPose();
 
-        poseStack.pushPose();
-        poseStack.translate(0.0F, 0.0F, 400.0F);
         UIElement.render(graphics, part3, mouseX, mouseY);
-        poseStack.popPose();
-
-        poseStack.pushPose();
-        poseStack.translate(0.0F, 0.0F, 500.0F);
         UIElement.render(graphics, arrow, mouseX, mouseY);
-        poseStack.popPose();
-
-        poseStack.pushPose();
-        poseStack.translate(0.0F, 0.0F, 500.0F);
         UIElement.render(graphics, tables, mouseX, mouseY);
-        poseStack.popPose();
-
-        poseStack.pushPose();
-        poseStack.translate(0.0F, 0.0F, 500.0F);
         UIElement.render(graphics, bubble, mouseX, mouseY);
-        poseStack.popPose();
-
-        poseStack.pushPose();
-        poseStack.translate(0.0F, 0.0F, 500.0F);
         UIElement.render(graphics, count, mouseX, mouseY);
-        poseStack.popPose();
-
-        poseStack.pushPose();
-        poseStack.translate(0.0F, 0.0F, 700.0F);
         UIElement.render(graphics, btn, mouseX, mouseY);
-        poseStack.popPose();
-
-        poseStack.pushPose();
-        poseStack.translate(0.0F, 0.0F, 800.0F);
         UIElement.renderToolTip(graphics, item, mouseX, mouseY);
-        poseStack.popPose();
     }
 
     public void resize() {
@@ -149,7 +108,7 @@ public class UIServeRequest extends UIElement {
 
             screen.handler.removeAt(index);
             CancelRequestPayload payload = new CancelRequestPayload(1,screen.maid.getUUID(),index);
-            NetworkHandler.sendToServer(payload);
+            ClientNetworkHandler.sendToServer(payload);
 
             screen.initRequests();
         }

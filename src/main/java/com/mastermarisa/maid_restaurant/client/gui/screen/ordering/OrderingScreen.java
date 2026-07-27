@@ -20,6 +20,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
@@ -91,8 +92,8 @@ public class OrderingScreen extends Screen implements IPageable {
     }
 
     @Override
-    public void resize(Minecraft minecraft, int width, int height) {
-        super.resize(minecraft, width, height);
+    public void resize(int width, int height) {
+        super.resize(width, height);
         RecipePage page = getCurrentPage();
         page.setCenter(getScreenCenterX(),getScreenCenterY());
         page.onResize();
@@ -117,11 +118,11 @@ public class OrderingScreen extends Screen implements IPageable {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (getCurrentPage() != null) UIElement.onMouseClicked(getCurrentPage(),mouseX,mouseY,button);
-        UIElement.onMouseClicked(orderTags,mouseX,mouseY,button);
-        UIElement.onMouseClicked(selector,mouseX,mouseY,button);
-        return super.mouseClicked(mouseX, mouseY, button);
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (getCurrentPage() != null) UIElement.onMouseClicked(getCurrentPage(),event.x(),event.y(),event.button());
+        UIElement.onMouseClicked(orderTags,event.x(),event.y(),event.button());
+        UIElement.onMouseClicked(selector,event.x(),event.y(),event.button());
+        return super.mouseClicked(event, doubleClick);
     }
 
     private void resizeSearchBox(int centerX, int centerY) {
@@ -268,7 +269,7 @@ public class OrderingScreen extends Screen implements IPageable {
         filter = filter.toLowerCase(Locale.ROOT);
         for (RecipeData data : input) {
             String displayName = data.result.getHoverName().getString().toLowerCase(Locale.ROOT);
-            String registerName = data.result.getDescriptionId();
+            String registerName = data.result.getItem().getDescriptionId();
             if (displayName.contains(filter))
                 filtered.add(data);
             else if (registerName.contains(filter))

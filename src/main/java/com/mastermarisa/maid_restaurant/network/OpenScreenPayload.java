@@ -1,12 +1,10 @@
 package com.mastermarisa.maid_restaurant.network;
 
-import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import com.mastermarisa.maid_restaurant.MaidRestaurant;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 public record OpenScreenPayload(int actionCode, int id) implements CustomPacketPayload {
@@ -27,7 +25,4 @@ public record OpenScreenPayload(int actionCode, int id) implements CustomPacketP
                     OpenScreenPayload::new
             );
 
-    public static void handle(OpenScreenPayload payload) {
-        // Client GUI migration is staged after the common networking layer.
-    }
 }

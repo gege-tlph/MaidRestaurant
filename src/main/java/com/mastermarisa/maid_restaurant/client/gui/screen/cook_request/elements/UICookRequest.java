@@ -13,7 +13,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import com.mastermarisa.maid_restaurant.network.NetworkHandler;
+import com.mastermarisa.maid_restaurant.client.ClientNetworkHandler;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.awt.*;
@@ -37,7 +37,9 @@ public class UICookRequest extends UIElement {
         CookRequest request = Objects.requireNonNull(screen.handler.getAt(index));
         ICookTask iCookTask = CookTasks.getTask(request.type);
         Level level = screen.maid.level();
-        ItemStack result = iCookTask.getResult(level.getRecipeManager().byKey(request.id).get(),level);
+        // Client recipe access no longer exposes RecipeManager by identifier;
+        // the server-sent request remains authoritative for task execution.
+        ItemStack result = ItemStack.EMPTY;
         result = result.copyWithCount(result.getCount() * request.requested);
 
         toServe = new UIItemStack(result);
@@ -103,7 +105,7 @@ public class UICookRequest extends UIElement {
             if (!screen.checkAvailability()) return;
             attributes.setCycle(!attributes.cycle());
             ModifyAttributePayload payload = new ModifyAttributePayload(0,screen.maid.getUUID(),index,attributes.getAttributes());
-            NetworkHandler.sendToServer(payload);
+            ClientNetworkHandler.sendToServer(payload);
         }
     }
 
@@ -121,7 +123,7 @@ public class UICookRequest extends UIElement {
             this.index = index;
             this.screen = screen;
             this.attributes = Objects.requireNonNull(screen.handler.getAt(index)).attributes;
-            disabled = new UIItemStack(new ItemStack(ModItems.TABLE_OAK.get()));
+            disabled = new UIItemStack(new ItemStack(ModItems.TABLE_OAK));
             insertable = new UIItemStack(new ItemStack(Items.HOPPER));
             spaceEnough = new UIItemStack(new ItemStack(Items.CHEST));
             disabled.tooltip.add(Component.translatable("gui.maid_restaurant.cook_request.stocking_mode_unlimited"));
@@ -153,7 +155,7 @@ public class UICookRequest extends UIElement {
             attributes.getAttributes()[1]++;
             if (attributes.getAttributes()[1] > 2) attributes.getAttributes()[1] = 0;
             ModifyAttributePayload payload = new ModifyAttributePayload(0,screen.maid.getUUID(),index,attributes.getAttributes());
-            NetworkHandler.sendToServer(payload);
+            ClientNetworkHandler.sendToServer(payload);
         }
     }
 }

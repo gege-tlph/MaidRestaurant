@@ -11,6 +11,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public abstract class UIElement {
@@ -81,7 +82,13 @@ public abstract class UIElement {
     }
 
     protected final void renderTooltip(GuiGraphics graphics, ItemStack itemStack, List<? extends FormattedText> tooltip, int mouseX, int mouseY) {
-        graphics.renderComponentTooltip(font, tooltip, mouseX, mouseY, itemStack);
+        if (tooltip.stream().allMatch(Component.class::isInstance)) {
+            @SuppressWarnings("unchecked")
+            List<Component> components = (List<Component>) (List<?>) tooltip;
+            graphics.setTooltipForNextFrame(font, components, Optional.empty(), mouseX, mouseY);
+        } else {
+            graphics.setTooltipForNextFrame(font, itemStack.getHoverName(), mouseX, mouseY);
+        }
     }
 
     public void addChild(UIElement element){

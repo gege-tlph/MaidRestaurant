@@ -8,6 +8,7 @@ import com.mastermarisa.maid_restaurant.client.gui.screen.cook_request.elements.
 import com.mastermarisa.maid_restaurant.client.gui.screen.serve_request.elements.UIServeRequest;
 import com.mastermarisa.maid_restaurant.request.ServeRequestHandler;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -38,15 +39,15 @@ public class ServeRequestScreen extends Screen {
     }
 
     @Override
-    public void resize(Minecraft minecraft, int width, int height) {
-        super.resize(minecraft, width, height);
+    public void resize(int width, int height) {
+        super.resize(width, height);
         initRequests();
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        UIElement.onMouseClicked(container,mouseX,mouseY,button);
-        return super.mouseClicked(mouseX, mouseY, button);
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        UIElement.onMouseClicked(container,event.x(),event.y(),event.button());
+        return super.mouseClicked(event, doubleClick);
     }
 
     public boolean checkAvailability() {
