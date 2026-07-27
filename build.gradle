@@ -65,9 +65,6 @@ sourceSets {
             // Bakeries has no verified 1.21.11 Fabric artifact in the shared
             // workspace yet; its NeoForge-only adapters stay staged separately.
             exclude "com/mastermarisa/maid_restaurant/compat/bakeries/**"
-            // World rendering uses the 1.21.11 submit-node pipeline and is
-            // being migrated separately from the screen layer.
-            exclude "com/mastermarisa/maid_restaurant/client/render/**"
         }
     }
 }

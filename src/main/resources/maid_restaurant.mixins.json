@@ -6,6 +6,9 @@
     "TableBlockMixin","MaidStealEdibleMoveBlockTaskMixin",
     "FruitBasketBlockEntityMixin"
   ],
+  "client": [
+    "client.FarmersDelightClientMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   },

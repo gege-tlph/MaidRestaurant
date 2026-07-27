@@ -1,83 +1,64 @@
 package com.mastermarisa.maid_restaurant.client.render;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import net.fabricmc.loader.api.FabricLoader;
-import org.joml.Vector3f;
 
-public class WorldItemRenderer {
-    public static final boolean IRIS_LOADED = FabricLoader.getInstance().isModLoaded("iris");
+/**
+ * Prepares item models during world extraction and submits the immutable
+ * render state during the main render pass.
+ */
+public final class WorldItemRenderer {
+    private WorldItemRenderer() {
+    }
 
-    public static void renderItemStackTowardPlayer(PoseStack poseStack, MultiBufferSource.BufferSource buffer, Vec3 targetPos
-            , Minecraft minecraft, ItemStack itemStack, int packedLight) {
-        boolean shader = IRIS_LOADED && ShaderState.shaderEnabled();
-
-        Vector3f shaderLightDirections$1 = null;
-        Vector3f shaderLightDirections$2 = null;
-        if (!shader){
-            if (buffer instanceof MultiBufferSource.BufferSource bufferSource)
-                bufferSource.endBatch();
-            shaderLightDirections$1 = new Vector3f(RenderSystem.shaderLightDirections[0]);
-            shaderLightDirections$2 = new Vector3f(RenderSystem.shaderLightDirections[1]);
-        }
-
-        poseStack.pushPose();
-
-        Camera camera = minecraft.gameRenderer.getMainCamera();
-        Vec3 cameraPos = camera.getPosition();
-
-        Vec3 renderPos = targetPos.add(0, 0.5, 0).subtract(cameraPos);
-
-        poseStack.translate(renderPos.x, renderPos.y, renderPos.z);
-
-        double dx = cameraPos.x - (targetPos.x + 0.5);
-        double dz = cameraPos.z - (targetPos.z + 0.5);
-        float yaw = (float) Math.atan2(dz, dx);
-
-        poseStack.mulPose(Axis.YP.rotation(-yaw + (float) Math.PI / 2));
-
-        float time = (minecraft.level.getGameTime()) / 20.0f;
-        poseStack.translate(0, Math.sin(time) * 0.1, 0);
-
-        //poseStack.mulPose(Axis.YP.rotation(time % 360));
-
-        poseStack.scale(0.5f, 0.5f, 0.5f);
-
-        ItemRenderer itemRenderer = minecraft.getItemRenderer();
-
-        if (!shader){
-            Vector3f vec = poseStack.last().pose().transformDirection(new Vector3f(0, 0, 1)).normalize();
-            RenderSystem.setShaderLights(vec, vec);
-            packedLight = LightTexture.FULL_BRIGHT;
-        }
-
-        itemRenderer.renderStatic(
+    public static PreparedItem prepare(Minecraft minecraft, Camera camera, Vec3 targetPos,
+                                       ItemStack itemStack, float partialTick) {
+        ItemStackRenderState renderState = new ItemStackRenderState();
+        minecraft.getItemModelResolver().updateForTopItem(
+                renderState,
                 itemStack,
                 ItemDisplayContext.FIXED,
-                packedLight,
-                OverlayTexture.NO_OVERLAY,
-                poseStack,
-                buffer,
                 minecraft.level,
+                null,
                 0
         );
 
-        poseStack.popPose();
+        Vec3 worldPos = targetPos.add(0.0D, 0.5D, 0.0D);
+        Vec3 cameraPos = camera.position();
+        Vec3 relativePos = worldPos.subtract(cameraPos);
+        double dx = cameraPos.x - worldPos.x;
+        double dz = cameraPos.z - worldPos.z;
+        float yaw = (float) Math.atan2(dz, dx);
+        float time = (minecraft.level.getGameTime() + partialTick) / 20.0F;
+        float bob = (float) Math.sin(time) * 0.1F;
+        return new PreparedItem(relativePos, yaw, bob, renderState);
+    }
 
-        if (!shader){
-            buffer.endBatch();
-            RenderSystem.shaderLightDirections[0] = shaderLightDirections$1;
-            RenderSystem.shaderLightDirections[1] = shaderLightDirections$2;
-        }
+    public static void submit(PoseStack poseStack, SubmitNodeCollector collector, PreparedItem item) {
+        poseStack.pushPose();
+        poseStack.translate(item.relativePos.x, item.relativePos.y + item.bob, item.relativePos.z);
+        poseStack.mulPose(Axis.YP.rotation(-item.yaw + (float) Math.PI / 2.0F));
+        poseStack.scale(0.5F, 0.5F, 0.5F);
+        item.renderState.submit(
+                poseStack,
+                collector,
+                LightTexture.FULL_BRIGHT,
+                OverlayTexture.NO_OVERLAY,
+                0
+        );
+        poseStack.popPose();
+    }
+
+    public record PreparedItem(Vec3 relativePos, float yaw, float bob,
+                               ItemStackRenderState renderState) {
     }
 }

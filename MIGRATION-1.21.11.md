@@ -3,9 +3,9 @@
 Branch: `port/1.21.11-fabric`
 
 This is a migration baseline, not a feature-complete release. The common
-gameplay layer, client screen layer, and Farmers Delight Refabricated
-compatibility compile and package successfully, while world rendering and
-Bakeries compatibility remain isolated.
+gameplay layer, client screen/render layer, and Farmers Delight Refabricated
+compatibility compile and package successfully, while Bakeries compatibility
+remains isolated.
 
 ## Verified baseline
 
@@ -40,6 +40,16 @@ The full target dependency set loads, all mod entrypoints and Maid Restaurant
 Mixins initialize, and the server reaches the normal EULA gate. The EULA was
 not accepted automatically, so world creation and gameplay were not started.
 
+Client smoke command:
+
+```powershell
+.\gradlew.bat runClient --no-daemon --no-configuration-cache
+```
+
+The complete development modpack reaches the main menu after resource and
+renderer initialization. The development account emits expected Mojang/Realms
+401 warnings, but those do not prevent offline client startup.
+
 ## Migrated architecture
 
 - NeoForge mod/event entrypoints were replaced with Fabric initializers and
@@ -58,6 +68,12 @@ not accepted automatically, so world creation and gameplay were not started.
   manager boundary.
 - The custom sitting entity uses the 1.21.11 `ValueInput`/`ValueOutput`
   persistence contract.
+- The sitting entity renderer and selected-table item indicators use Fabric's
+  1.21.11 extraction/submit rendering split. Item models are resolved during
+  extraction and submitted through `SubmitNodeCollector`.
+- Selected table positions are synchronized explicitly from the server before
+  rendering. The server also sends the target snapshot used to open the
+  ordering screen, keeping the interaction authoritative.
 
 ## Included in the current JAR
 
@@ -65,14 +81,15 @@ not accepted automatically, so world creation and gameplay were not started.
 - Pot, stockpot, and steamer integration for Kaleidoscope Cookery
 - Farmers Delight Refabricated cooking-pot compatibility
 - Request/task data serialization and Fabric networking payloads
+- Client ordering/cook/serve screens and their open-screen payload routes
+- Sitting entity renderer and selected-table world indicators
 - Common Mixins
 
 ## Intentionally isolated
 
-The following source sets are excluded in `build.gradle` until their target
-APIs are verified:
+The following source set is excluded in `build.gradle` until its target API is
+verified:
 
-- `client/render/**`
 - `compat/bakeries/**`
 
 They must not be treated as removed features. Restore each exclusion only
@@ -80,9 +97,9 @@ after that module compiles and its behavior can be tested.
 
 ## Known behavior gaps
 
-- `ClientSetup` and render-stage integration are placeholders.
 - The client ordering/cook/serve screens now compile against the 1.21.11
-  input and `GuiGraphics` APIs, and the open-screen payload routes to them.
+  input and `GuiGraphics` APIs, and server-authoritative payloads route to
+  them. In-world interaction still needs a gameplay pass.
 - The ordering screen does not resolve recipes on the client. Server-side
   order handling now resolves the authoritative output and serializes an item
   id/count snapshot on `CookRequest`, which the client card renders directly.
@@ -96,19 +113,25 @@ after that module compiles and its behavior can be tested.
 - `RestaurantConfig` currently uses static defaults and has no persisted
   Fabric configuration backend.
 - Data generation providers are placeholders.
-- Client startup has not yet been exercised with a complete runtime modpack.
+- `OrderItem.hasRequests` remains a placeholder, so its 1.21.11 item definition
+  currently selects the no-requests model until request recording is restored.
+- Farmers Delight Refabricated 3.4.9 has an upstream 1.21.11 client-startup
+  defect: its bundled early-riser does not add
+  `FARMERSDELIGHT_COOKING`, although the client initializer validates it.
+  A client-only compatibility Mixin handles that discarded validation result
+  and allows the full modpack to reach the main menu.
 
 ## Next verification gates
 
-1. Exercise the migrated client screens with a complete runtime modpack,
-   including open-screen payloads and request result snapshots.
-2. Restore entity renderer registration and block-selection rendering.
-3. Accept the EULA manually in a disposable development instance when ready,
+1. Exercise the migrated client screens in-world, including table selection,
+   open-screen payloads, request result snapshots, and world indicators.
+2. Accept the EULA manually in a disposable development instance when ready,
    then continue dedicated-server world testing.
-4. Exercise order creation, request distribution, maid cooking, serving,
+3. Exercise order creation, request distribution, maid cooking, serving,
    save/reload, and multiplayer synchronization.
-5. Port Bakeries only when a verified Fabric 1.21.11 artifact/API is present.
-6. Replace configuration, Patchouli reward, and data-generation placeholders.
+4. Port Bakeries only when a verified Fabric 1.21.11 artifact/API is present.
+5. Replace configuration, Patchouli reward, item request recording, and
+   data-generation placeholders.
 
 ## Evidence sources
 

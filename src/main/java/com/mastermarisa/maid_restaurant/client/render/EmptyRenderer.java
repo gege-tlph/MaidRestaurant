@@ -1,13 +1,11 @@
 package com.mastermarisa.maid_restaurant.client.render;
 
-import com.mastermarisa.maid_restaurant.MaidRestaurant;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.state.CameraRenderState;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 
 public class EmptyRenderer<T extends Entity> extends EntityRenderer<T, EntityRenderState> {
@@ -18,11 +16,6 @@ public class EmptyRenderer<T extends Entity> extends EntityRenderer<T, EntityRen
     @Override
     public EntityRenderState createRenderState() {
         return new EntityRenderState();
-    }
-
-    @Override
-    public Identifier getTextureLocation(EntityRenderState state) {
-        return MaidRestaurant.resourceLocation("");
     }
 
     @Override

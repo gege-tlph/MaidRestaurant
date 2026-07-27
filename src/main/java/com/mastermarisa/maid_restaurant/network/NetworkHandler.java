@@ -37,6 +37,8 @@ public class NetworkHandler {
         PayloadTypeRegistry.playC2S().register(CancelRequestPayload.TYPE, CancelRequestPayload.STREAM_CODEC);
         PayloadTypeRegistry.playC2S().register(ChangeHandlerAcceptValuePayload.TYPE, ChangeHandlerAcceptValuePayload.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(OpenScreenPayload.TYPE, OpenScreenPayload.STREAM_CODEC);
+        PayloadTypeRegistry.playS2C().register(SyncBlockSelectionPayload.TYPE, SyncBlockSelectionPayload.STREAM_CODEC);
+        PayloadTypeRegistry.playS2C().register(OpenOrderingScreenPayload.TYPE, OpenOrderingScreenPayload.STREAM_CODEC);
         ServerPlayNetworking.registerGlobalReceiver(SendOrderPayload.TYPE,
                 (payload, context) -> context.server().execute(() -> handleSendOrdersOnServer(payload, context.player())));
         ServerPlayNetworking.registerGlobalReceiver(ModifyAttributePayload.TYPE,
