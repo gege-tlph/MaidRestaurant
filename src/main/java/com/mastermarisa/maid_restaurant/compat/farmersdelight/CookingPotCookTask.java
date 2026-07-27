@@ -38,6 +38,11 @@ public class CookingPotCookTask implements ICookTask {
     public RecipeType<?> getType() { return ModRecipeTypes.COOKING.get(); }
 
     @Override
+    public ItemStack getResult(RecipeHolder<? extends Recipe<?>> recipeHolder, Level level) {
+        return ((CookingPotRecipe) recipeHolder.value()).result();
+    }
+
+    @Override
     public List<StackPredicate> getIngredients(RecipeHolder<? extends Recipe<?>> recipeHolder, Level level) {
         CookingPotRecipe recipe = (CookingPotRecipe) recipeHolder.value();
         List<StackPredicate> predicates = new ArrayList<>(recipe.input().stream().filter(s->!s.isEmpty()).map(StackPredicate::new).toList());

@@ -1,18 +1,15 @@
 package com.mastermarisa.maid_restaurant.client.gui.screen.cook_request.elements;
 
 import com.github.ysbbbbbb.kaleidoscopecookery.init.ModItems;
-import com.mastermarisa.maid_restaurant.api.ICookTask;
 import com.mastermarisa.maid_restaurant.client.gui.UIConst;
 import com.mastermarisa.maid_restaurant.client.gui.base.*;
 import com.mastermarisa.maid_restaurant.client.gui.screen.cook_request.CookRequestScreen;
 import com.mastermarisa.maid_restaurant.network.ModifyAttributePayload;
 import com.mastermarisa.maid_restaurant.request.CookRequest;
-import com.mastermarisa.maid_restaurant.utils.CookTasks;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.Level;
 import com.mastermarisa.maid_restaurant.client.ClientNetworkHandler;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -35,11 +32,7 @@ public class UICookRequest extends UIElement {
         bg = new UIImage(UIConst.requestImage);
 
         CookRequest request = Objects.requireNonNull(screen.handler.getAt(index));
-        ICookTask iCookTask = CookTasks.getTask(request.type);
-        Level level = screen.maid.level();
-        // Client recipe access no longer exposes RecipeManager by identifier;
-        // the server-sent request remains authoritative for task execution.
-        ItemStack result = ItemStack.EMPTY;
+        ItemStack result = request.result.copy();
         result = result.copyWithCount(result.getCount() * request.requested);
 
         toServe = new UIItemStack(result);

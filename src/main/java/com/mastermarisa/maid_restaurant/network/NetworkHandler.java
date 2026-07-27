@@ -67,6 +67,9 @@ public class NetworkHandler {
             ));
 
             for (var request : mapped) {
+                request.result = CookTasks.getTask(request.type)
+                        .getResult(RecipeAccess.require((ServerLevel) player.level(), request.id), player.level())
+                        .copy();
                 RequestManager.post((ServerLevel) player.level(), request, CookRequest.TYPE);
             }
         }

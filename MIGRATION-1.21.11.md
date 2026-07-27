@@ -83,9 +83,11 @@ after that module compiles and its behavior can be tested.
 - `ClientSetup` and render-stage integration are placeholders.
 - The client ordering/cook/serve screens now compile against the 1.21.11
   input and `GuiGraphics` APIs, and the open-screen payload routes to them.
-- The ordering screen cannot yet resolve a recipe by identifier through the
-  public client recipe API, so a cook-request card currently uses an empty
-  result icon until a server-sent result field is added.
+- The ordering screen does not resolve recipes on the client. Server-side
+  order handling now resolves the authoritative output and serializes an item
+  id/count snapshot on `CookRequest`, which the client card renders directly.
+  This keeps recipe lookup server-authoritative while preserving the existing
+  screen behavior.
 - `GivePatchouliBookConfigTrigger` is a no-op. Patchouli availability is
   verified, but the book reward flow still needs a Fabric implementation.
 - `ICookTask` default recipe ingredient/result methods are temporary safe
@@ -98,8 +100,8 @@ after that module compiles and its behavior can be tested.
 
 ## Next verification gates
 
-1. Port GUI classes to the 1.21.11 screen/render API and restore the screen
-   payload handler.
+1. Exercise the migrated client screens with a complete runtime modpack,
+   including open-screen payloads and request result snapshots.
 2. Restore entity renderer registration and block-selection rendering.
 3. Accept the EULA manually in a disposable development instance when ready,
    then continue dedicated-server world testing.

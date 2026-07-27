@@ -41,6 +41,13 @@ public class CookRequest implements IRequest {
     public int remain;
     public int requested;
     public long[] targets;
+    /**
+     * Server-resolved output snapshot used by client request screens.
+     *
+     * <p>The client no longer has a public recipe-manager lookup by identifier,
+     * so the authoritative result is carried with the request data.</p>
+     */
+    public ItemStack result = ItemStack.EMPTY;
     public Attributes attributes = new Attributes();
     public CompoundTag extraData = new CompoundTag();
 
@@ -63,6 +70,10 @@ public class CookRequest implements IRequest {
         tag.putInt("remain",remain);
         tag.putInt("requested",requested);
         tag.putLongArray("targets",targets);
+        if (!result.isEmpty()) {
+            tag.putString("result_item", EncodeUtils.encode(result).toString());
+            tag.putInt("result_count", result.getCount());
+        }
         tag.putByteArray("attributes",attributes.getAttributes());
         tag.put("extra",extraData);
 
@@ -77,6 +88,14 @@ public class CookRequest implements IRequest {
             remain = tag.getInt("remain").orElse(0);
             requested = tag.getInt("requested").orElse(0);
             targets = tag.getLongArray("targets").orElse(new long[0]);
+            if (tag.contains("result_item")) {
+                result = new ItemStack(
+                        EncodeUtils.decode(tag.getString("result_item").orElse("")),
+                        tag.getInt("result_count").orElse(0)
+                );
+            } else {
+                result = ItemStack.EMPTY;
+            }
             attributes = new Attributes(tag.getByteArray("attributes").orElse(new byte[0]));
             extraData = tag.getCompound("extra").orElse(new CompoundTag());
         }
@@ -161,6 +180,7 @@ public class CookRequest implements IRequest {
         request.requested = requested;
         request.type = type;
         request.targets = Arrays.copyOf(targets,targets.length);
+        request.result = result.copy();
         request.attributes = new Attributes(Arrays.copyOf(attributes.getAttributes(),attributes.getAttributes().length));
         request.extraData = new CompoundTag();
         return request;
