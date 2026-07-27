@@ -53,8 +53,8 @@ public class RequestManager {
 
     public static void post(ServerLevel level, IRequest request, int type) {
         switch (type) {
-            case CookRequest.TYPE -> level.getData(WorldCookRequestHandler.TYPE).add((CookRequest) request);
-            case ServeRequest.TYPE -> level.getData(WorldServeRequestHandler.TYPE).add((ServeRequest) request);
+            case CookRequest.TYPE -> level.getAttachedOrCreate(WorldCookRequestHandler.ATTACHMENT).add((CookRequest) request);
+            case ServeRequest.TYPE -> level.getAttachedOrCreate(WorldServeRequestHandler.ATTACHMENT).add((ServeRequest) request);
         }
     }
 
@@ -65,7 +65,7 @@ public class RequestManager {
 
     private static void tryDistributeCookRequest(ServerLevel level) {
         List<CookRequest> toRemove = new ArrayList<>();
-        WorldCookRequestHandler handler = level.getData(WorldCookRequestHandler.TYPE);
+        WorldCookRequestHandler handler = level.getAttachedOrCreate(WorldCookRequestHandler.ATTACHMENT);
         for (var request : handler.toList()) {
             BlockPos pos = EncodeUtils.decode(request.targets[0]);
             List<EntityMaid> cookers = MaidTracker.maids.stream().filter(maid -> maid.getTask() instanceof TaskCook).filter(m-> {
@@ -88,7 +88,7 @@ public class RequestManager {
 
     public static void tryDistributeServeRequest(ServerLevel level) {
         List<ServeRequest> toRemove = new ArrayList<>();
-        WorldServeRequestHandler handler = level.getData(WorldServeRequestHandler.TYPE);
+        WorldServeRequestHandler handler = level.getAttachedOrCreate(WorldServeRequestHandler.ATTACHMENT);
         for (var request : handler.toList()) {
             BlockPos pos = request.targets.getFirst();
             List<EntityMaid> waiters = MaidTracker.maids.stream().filter(maid -> maid.getTask() instanceof TaskWaiter).filter(m-> {

@@ -5,12 +5,13 @@ import com.github.ysbbbbbb.kaleidoscopecookery.init.ModItems;
 import com.mastermarisa.maid_restaurant.MaidRestaurant;
 import com.mastermarisa.maid_restaurant.api.IMaidStorage;
 import com.mastermarisa.maid_restaurant.data.TagBlock;
+import com.mastermarisa.maid_restaurant.utils.ListItemHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
+import cn.sh1rocu.touhoulittlemaid.util.itemhandler.IItemHandler;
+import cn.sh1rocu.touhoulittlemaid.util.itemhandler.ItemHandlerHelper;
 import org.jetbrains.annotations.Nullable;
 
 public class FruitBasketStorage implements IMaidStorage {
@@ -20,7 +21,7 @@ public class FruitBasketStorage implements IMaidStorage {
     public String getUID() { return UID; }
 
     @Override
-    public ItemStack getIcon() { return new ItemStack(ModItems.FRUIT_BASKET.get()); }
+    public ItemStack getIcon() { return new ItemStack(ModItems.FRUIT_BASKET); }
 
     @Override
     public boolean isValid(Level level, BlockPos pos) {
@@ -30,7 +31,7 @@ public class FruitBasketStorage implements IMaidStorage {
     @Override
     public @Nullable IItemHandler getHandler(Level level, BlockPos pos) {
         if (level.getBlockEntity(pos) instanceof FruitBasketBlockEntity basket) {
-            return basket.getItems();
+            return new ListItemHandler(basket.getItems());
         }
 
         return null;
@@ -39,7 +40,7 @@ public class FruitBasketStorage implements IMaidStorage {
     @Override
     public ItemStack extract(Level level, BlockPos pos, int slot, int amount, boolean simulate) {
         if (level.getBlockEntity(pos) instanceof FruitBasketBlockEntity basket) {
-            ItemStack remainder = basket.getItems().extractItem(slot,amount,simulate);
+            ItemStack remainder = new ListItemHandler(basket.getItems()).extractItem(slot,amount,simulate);
             basket.refresh();
             return remainder;
         }
@@ -50,7 +51,7 @@ public class FruitBasketStorage implements IMaidStorage {
     @Override
     public ItemStack insert(Level level, BlockPos pos, ItemStack stack, boolean simulate) {
         if (level.getBlockEntity(pos) instanceof FruitBasketBlockEntity basket) {
-            ItemStack remainder = ItemHandlerHelper.insertItemStacked(basket.getItems(),stack,simulate);
+            ItemStack remainder = ItemHandlerHelper.insertItemStacked(new ListItemHandler(basket.getItems()),stack,simulate);
             basket.refresh();
             return remainder;
         }

@@ -34,7 +34,7 @@ public class BehaviorUtils {
     }
 
     public static BlockPos getSearchPos(EntityMaid maid) {
-        return maid.hasRestriction() ? maid.getRestrictCenter() : maid.blockPosition().below();
+        return maid.getBrainSearchPos();
     }
 
     public static void setTargetPos(LivingEntity entity, PositionTracker tracker, int type){
@@ -65,7 +65,7 @@ public class BehaviorUtils {
                 SitEntity entitySit = new SitEntity(level, pos);
                 entitySit.setYRot(((Direction)state.getValue(HorizontalDirectionalBlock.FACING)).toYRot());
                 level.addFreshEntity(entitySit);
-                maid.startRiding(entitySit, true);
+                maid.startRiding(entitySit);
             }
         }
 
@@ -79,7 +79,7 @@ public class BehaviorUtils {
                 SitEntity entitySit = new SitEntity(level, pos);
                 entitySit.setYRot(dir.toYRot());
                 level.addFreshEntity(entitySit);
-                maid.startRiding(entitySit, true);
+                maid.startRiding(entitySit);
             }
         }
 

@@ -1,10 +1,10 @@
 package com.mastermarisa.maid_restaurant.request;
 
 import com.mastermarisa.maid_restaurant.api.request.RequestHandler;
-import com.mastermarisa.maid_restaurant.api.request.RequestSyncer;
+import com.mastermarisa.maid_restaurant.utils.TaskDataKeys;
+import cn.sh1rocu.touhoulittlemaid.api.entity.data.TaskDataKey;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.neoforged.neoforge.attachment.AttachmentType;
 import org.jetbrains.annotations.Nullable;
 
 public class CookRequestHandler extends RequestHandler<CookRequest> {
@@ -27,6 +27,12 @@ public class CookRequestHandler extends RequestHandler<CookRequest> {
         return request;
     }
 
-    public static final AttachmentType<CookRequestHandler> TYPE = AttachmentType
-            .serializable(CookRequestHandler::new).sync(new RequestSyncer<>(CookRequestHandler::new)).build();
+    public static final TaskDataKey<CookRequestHandler> TYPE = TaskDataKeys.create(
+            "cook_request_handler", CookRequestHandler::new,
+            value -> value.serializeNBT(null),
+            tag -> {
+                CookRequestHandler value = new CookRequestHandler();
+                value.deserializeNBT(null, tag);
+                return value;
+            });
 }

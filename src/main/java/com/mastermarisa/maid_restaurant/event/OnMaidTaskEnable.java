@@ -11,14 +11,10 @@ import com.mastermarisa.maid_restaurant.utils.BehaviorUtils;
 import com.mastermarisa.maid_restaurant.utils.BlockUsageManager;
 import com.mastermarisa.maid_restaurant.utils.EncodeUtils;
 import com.mastermarisa.maid_restaurant.utils.RequestManager;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 
 import java.util.Arrays;
 
-@EventBusSubscriber
 public class OnMaidTaskEnable {
-    @SubscribeEvent
     public static void onMaidTaskEnable(MaidTaskEnableEvent event) {
         EntityMaid maid = event.getEntityMaid();
 

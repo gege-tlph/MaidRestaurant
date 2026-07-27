@@ -3,19 +3,23 @@ package com.mastermarisa.maid_restaurant.init;
 import com.mastermarisa.maid_restaurant.MaidRestaurant;
 import com.mastermarisa.maid_restaurant.item.OrderItem;
 import com.mastermarisa.maid_restaurant.item.OrderMenuItem;
+import com.mastermarisa.maid_restaurant.utils.RegistryRef;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.registries.DeferredItem;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import java.util.function.Function;
 
-public class ModItems {
-    private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MaidRestaurant.MOD_ID);
+public final class ModItems {
+    public static final RegistryRef<Item> ORDER_MENU = new RegistryRef<>(register("order_menu", OrderMenuItem::new));
+    public static final RegistryRef<Item> ORDER_ITEM = new RegistryRef<>(register("order_item", OrderItem::new));
 
-    public static final DeferredItem<Item> ORDER_MENU = ITEMS.registerItem("order_menu", (properties)-> new OrderMenuItem());
+    private static Item register(String path, Function<Identifier, Item> factory) {
+        Identifier id = Identifier.fromNamespaceAndPath(MaidRestaurant.MOD_ID, path);
+        return Registry.register(BuiltInRegistries.ITEM, id, factory.apply(id));
+    }
 
-    public static final DeferredItem<Item> ORDER_ITEM = ITEMS.registerItem("order_item", (properties -> new OrderItem()));
-
-    public static void register(IEventBus mod){
-        ITEMS.register(mod);
+    public static void register() {
+        // Static fields perform registration before common initialization.
     }
 }

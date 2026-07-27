@@ -14,6 +14,7 @@ import com.mastermarisa.maid_restaurant.api.ICookTask;
 import com.mastermarisa.maid_restaurant.request.CookRequest;
 import com.mastermarisa.maid_restaurant.utils.BlockUsageManager;
 import com.mastermarisa.maid_restaurant.utils.ItemHandlerUtils;
+import com.mastermarisa.maid_restaurant.utils.RecipeAccess;
 import com.mastermarisa.maid_restaurant.utils.component.RecipeData;
 import com.mastermarisa.maid_restaurant.utils.component.StackPredicate;
 import net.minecraft.core.BlockPos;
@@ -27,7 +28,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -49,7 +49,7 @@ public class PotCookTask implements ICookTask {
 
     @Override
     public ItemStack getIcon() {
-        return ModItems.POT.toStack();
+        return ModItems.POT.getDefaultInstance();
     }
 
     @Override
@@ -80,7 +80,7 @@ public class PotCookTask implements ICookTask {
         if (level.getBlockEntity(pos) instanceof PotBlockEntity pot) {
             ans.addAll(pot.getInputs().stream().filter(s -> !s.isEmpty()).toList());
             if (level.getBlockState(pos).getValue(PotBlock.HAS_OIL))
-                ans.add(new ItemStack(ModItems.OIL.get()));
+                ans.add(new ItemStack(ModItems.OIL));
         }
 
         return ans;
@@ -90,8 +90,8 @@ public class PotCookTask implements ICookTask {
     public @Nullable BlockPos searchWorkBlock(ServerLevel level, EntityMaid maid, int horizontalSearchRange, int verticalSearchRange) {
         BlockPos blockPos = maid.getBrainSearchPos();
         PoiManager poiManager = level.getPoiManager();
-        int range = (int) maid.getRestrictRadius();
-        return poiManager.getInRange((type)-> type.value().equals(ModPoi.POT.get()), blockPos, range, PoiManager.Occupancy.ANY)
+        int range = (int) maid.searchRadius();
+        return poiManager.getInRange((type)-> type.value().equals(ModPoi.POT), blockPos, range, PoiManager.Occupancy.ANY)
                 .map(PoiRecord::getPos).filter((pos)-> BlockUsageManager.getUserCount(pos) <= 0).min(Comparator.comparingDouble(pos -> pos.distSqr(maid.blockPosition()))).orElse(null);
     }
 
@@ -121,11 +121,10 @@ public class PotCookTask implements ICookTask {
 
     @Override
     public List<RecipeData> getAllRecipeData(Level level) {
-        RecipeManager manager = level.getRecipeManager();
         List<RecipeData> ans = new ArrayList<>();
-        for (var holder : manager.getAllRecipesFor(ModRecipes.POT_RECIPE)) {
+        for (var holder : RecipeAccess.allOf(level, ModRecipes.POT_RECIPE)) {
             if (!blackList.contains(holder.id().toString()))
-                ans.add(new RecipeData(holder.id(),ModRecipes.POT_RECIPE,getIcon(),holder.value().result()));
+                ans.add(new RecipeData(holder.id().identifier(),ModRecipes.POT_RECIPE,getIcon(),holder.value().result()));
         }
         return ans;
     }
@@ -139,7 +138,7 @@ public class PotCookTask implements ICookTask {
                 maid.swing(InteractionHand.OFF_HAND);
             }
         } else {
-            PotRecipe recipe = level.getRecipeManager().byKeyTyped(ModRecipes.POT_RECIPE,request.id).value();
+            PotRecipe recipe = RecipeAccess.<PotRecipe>require(level, request.id).value();
             List<StackPredicate> required = new ArrayList<>(recipe.ingredients().stream().filter(s->!s.isEmpty()).map(StackPredicate::new).toList());
             required = ItemHandlerUtils.getRequired(required,pot.getInputs());
             if (required.isEmpty()) {
@@ -172,7 +171,7 @@ public class PotCookTask implements ICookTask {
 
     private void tickState2(ServerLevel level, EntityMaid maid, BlockPos pos, PotBlockEntity pot, CookRequest request) {
         if (pot.hasCarrier()){
-            PotRecipe recipe = level.getRecipeManager().byKeyTyped(ModRecipes.POT_RECIPE,request.id).value();
+            PotRecipe recipe = RecipeAccess.<PotRecipe>require(level, request.id).value();
             ItemStack carrier = ItemHandlerUtils.tryExtractSingleSlot(maid.getAvailableInv(false),pot.getResult().getCount(),StackPredicate.of(recipe.carrier()),true);
             if (!carrier.isEmpty()) {
                 pot.takeOutProduct(level,maid,carrier);
@@ -180,7 +179,7 @@ public class PotCookTask implements ICookTask {
                 request.remain--;
             }
         } else {
-            pot.takeOutProduct(level,maid, new ItemStack(ModItems.KITCHEN_SHOVEL.get()));
+            pot.takeOutProduct(level,maid, new ItemStack(ModItems.KITCHEN_SHOVEL));
             maid.swing(InteractionHand.OFF_HAND);
             request.remain--;
         }

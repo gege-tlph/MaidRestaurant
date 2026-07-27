@@ -11,7 +11,7 @@ import com.mastermarisa.maid_restaurant.request.ServeRequest;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
+import com.mastermarisa.maid_restaurant.network.NetworkHandler;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.awt.*;
@@ -149,7 +149,7 @@ public class UIServeRequest extends UIElement {
 
             screen.handler.removeAt(index);
             CancelRequestPayload payload = new CancelRequestPayload(1,screen.maid.getUUID(),index);
-            PacketDistributor.sendToServer(payload);
+            NetworkHandler.sendToServer(payload);
 
             screen.initRequests();
         }

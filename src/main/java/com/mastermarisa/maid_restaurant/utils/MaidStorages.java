@@ -6,7 +6,7 @@ import com.mastermarisa.maid_restaurant.storage.FruitBasketStorage;
 import com.mastermarisa.maid_restaurant.storage.TableStorage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.items.IItemHandler;
+import cn.sh1rocu.touhoulittlemaid.util.itemhandler.IItemHandler;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;

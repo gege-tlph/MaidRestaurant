@@ -4,7 +4,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.neoforged.neoforge.common.util.INBTSerializable;
+import cn.sh1rocu.touhoulittlemaid.util.itemhandler.INBTSerializable;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedList;
@@ -66,11 +66,11 @@ public abstract class RequestHandler <T extends IRequest> implements INBTSeriali
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag) {
         if (!tag.contains("length")) return;
         requests = new LinkedList<>();
-        ListTag listTag = tag.getList("requests", Tag.TAG_COMPOUND);
-        for (int i = 0;i < tag.getInt("length");i++) {
-            requests.add(fromCompound(provider,listTag.getCompound(i)));
+        ListTag listTag = tag.getList("requests").orElse(new ListTag());
+        for (int i = 0;i < tag.getInt("length").orElse(0);i++) {
+            requests.add(fromCompound(provider,listTag.getCompound(i).orElse(new CompoundTag())));
         }
-        accept = tag.getBoolean("accept");
+        accept = tag.getBoolean("accept").orElse(true);
     }
 
     protected abstract T fromCompound(HolderLookup.Provider provider, CompoundTag tag);

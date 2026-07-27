@@ -9,7 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.wrapper.CombinedInvWrapper;
+import cn.sh1rocu.touhoulittlemaid.util.itemhandler.CombinedInvWrapper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -29,7 +29,7 @@ public class MaidStealEdibleMoveBlockTaskMixin extends MaidMoveToBlockTask {
     public MaidStealEdibleMoveBlockTaskMixin(float movementSpeed) {
         super(movementSpeed, 2);
         this.setMaxCheckRate(900);
-        this.action = InitEntities.MAID_EDIBLE_BLOCK_ACTION.get();
+        this.action = InitEntities.MAID_EDIBLE_BLOCK_ACTION;
     }
 
     /**

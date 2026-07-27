@@ -24,8 +24,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -33,7 +31,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 
-@OnlyIn(Dist.CLIENT)
 public class OrderingScreen extends Screen implements IPageable {
     private static final Minecraft mc;
     private static final Font font;
@@ -69,7 +66,7 @@ public class OrderingScreen extends Screen implements IPageable {
                 this::onSearchTextChanged,
                 UIConst.lessBlack
         );
-        this.searchBox.tooltip.add(Component.literal("搜索").withStyle(ChatFormatting.GOLD));
+        this.searchBox.tooltip.add(Component.literal("Search").withStyle(ChatFormatting.GOLD));
 
         RecipePage page = getCurrentPage();
         resizeSearchBox(page.getCenterX(),page.getMinY() + 21);

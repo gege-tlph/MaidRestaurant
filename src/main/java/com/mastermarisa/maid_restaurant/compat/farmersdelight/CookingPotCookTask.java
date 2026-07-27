@@ -5,6 +5,7 @@ import com.github.ysbbbbbb.kaleidoscopecookery.util.ItemUtils;
 import com.mastermarisa.maid_restaurant.api.ICookTask;
 import com.mastermarisa.maid_restaurant.request.CookRequest;
 import com.mastermarisa.maid_restaurant.utils.*;
+import com.mastermarisa.maid_restaurant.utils.RecipeAccess;
 import com.mastermarisa.maid_restaurant.utils.component.RecipeData;
 import com.mastermarisa.maid_restaurant.utils.component.StackPredicate;
 import net.minecraft.core.BlockPos;
@@ -12,12 +13,12 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.items.ItemStackHandler;
 import org.jetbrains.annotations.Nullable;
 import vectorwing.farmersdelight.common.block.entity.CookingPotBlockEntity;
 import vectorwing.farmersdelight.common.crafting.CookingPotRecipe;
 import vectorwing.farmersdelight.common.registry.ModItems;
 import vectorwing.farmersdelight.common.registry.ModRecipeTypes;
+import vectorwing.farmersdelight.refabricated.inventory.ItemStackHandler;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -39,11 +40,11 @@ public class CookingPotCookTask implements ICookTask {
     @Override
     public List<StackPredicate> getIngredients(RecipeHolder<? extends Recipe<?>> recipeHolder, Level level) {
         CookingPotRecipe recipe = (CookingPotRecipe) recipeHolder.value();
-        List<StackPredicate> predicates = new ArrayList<>(recipe.getIngredients().stream().filter(s->!s.isEmpty()).map(StackPredicate::new).toList());
-        ItemStack container = recipe.getOutputContainer();
+        List<StackPredicate> predicates = new ArrayList<>(recipe.input().stream().filter(s->!s.isEmpty()).map(StackPredicate::new).toList());
+        ItemStack container = recipe.container();
         if (!container.isEmpty())
-            for (int i = 0;i < recipe.getResultItem(level.registryAccess()).getCount();i++)
-                predicates.add(StackPredicate.of(recipe.getOutputContainer().getItem()));
+            for (int i = 0;i < recipe.result().getCount();i++)
+                predicates.add(StackPredicate.of(recipe.container().getItem()));
 
         return predicates;
     }
@@ -53,10 +54,10 @@ public class CookingPotCookTask implements ICookTask {
         List<ItemStack> ans = new ArrayList<>();
         if (level.getBlockEntity(pos) instanceof CookingPotBlockEntity pot) {
             CookRequest request = Objects.requireNonNull((CookRequest) RequestManager.peek(maid, CookRequest.TYPE));
-            CookingPotRecipe recipe = Objects.requireNonNull(level.getRecipeManager().byKeyTyped(ModRecipeTypes.COOKING.get(), request.id)).value();
+            CookingPotRecipe recipe = RecipeAccess.<CookingPotRecipe>require(level, request.id).value();
             ItemStackHandler handler = pot.getInventory();
             ans = ItemHandlerUtils.fromTo(
-                    handler,
+                    new FarmersItemHandlerAdapter(handler),
                     StackPredicate.of(s -> !s.isEmpty()),
                     0,
                     6,
@@ -64,19 +65,23 @@ public class CookingPotCookTask implements ICookTask {
             );
             ItemStack container = handler.getStackInSlot(7);
             if (!container.isEmpty()) ans.add(container.copy());
-            ItemStack output = recipe.getResultItem(level.registryAccess());
-            List<Ingredient> ingredients = recipe.getIngredients().stream().filter(i -> i.getItems().length != 0).toList();
+            ItemStack output = recipe.result();
+            List<Ingredient> ingredients = recipe.input().stream().filter(i -> i.items().findAny().isPresent()).toList();
             ItemStack meal = handler.getStackInSlot(6);
             int count = 0;
             if (output.is(meal.getItem())) count += meal.getCount();
             ItemStack result = handler.getStackInSlot(8);
             if (output.is(result.getItem())) {
                 count += result.getCount();
-                ans.add(recipe.getOutputContainer().copyWithCount(result.getCount()));
+                ans.add(recipe.container().copyWithCount(result.getCount()));
             }
-            if (count != 0)
-                for (var i : ingredients)
-                    ans.add(i.getItems()[0].copyWithCount(count / output.getCount()));
+            if (count != 0) {
+                int servings = count / output.getCount();
+                for (var ingredient : ingredients) {
+                    var first = ingredient.items().findFirst();
+                    if (first.isPresent()) ans.add(new ItemStack(first.get().value(), servings));
+                }
+            }
         }
 
         return ans;
@@ -109,9 +114,9 @@ public class CookingPotCookTask implements ICookTask {
         ItemStack meal = pot.getMeal();
         ItemStack container = handler.getStackInSlot(7);
         ItemStack result = handler.getStackInSlot(8);
-        CookingPotRecipe recipe = level.getRecipeManager().byKeyTyped(ModRecipeTypes.COOKING.get(), request.id).value();
-        ItemStack output = recipe.getResultItem(level.registryAccess());
-        ItemStack carrier = recipe.getOutputContainer();
+        CookingPotRecipe recipe = RecipeAccess.<CookingPotRecipe>require(level, request.id).value();
+        ItemStack output = recipe.result();
+        ItemStack carrier = recipe.container();
         if (result.is(output.getItem())) {
             if (result.getCount() / output.getCount() >= request.remain) {
                 ItemUtils.getItemToLivingEntity(maid,handler.extractItem(8,request.remain * output.getCount(),false));
@@ -127,14 +132,14 @@ public class CookingPotCookTask implements ICookTask {
             }
         } else {
             List<ItemStack> slots = ItemHandlerUtils.fromTo(
-                    handler,
+                    new FarmersItemHandlerAdapter(handler),
                     StackPredicate.of(s -> !s.isEmpty()),
                     0,
                     6,
                     true
             );
 
-            List<StackPredicate> ingredients = recipe.getIngredients().stream().filter(i -> i.getItems().length != 0).map(StackPredicate::new).toList();
+            List<StackPredicate> ingredients = recipe.input().stream().filter(i -> i.items().findAny().isPresent()).map(StackPredicate::new).toList();
             List<StackPredicate> required = ItemHandlerUtils.getRequired(ingredients,slots);
             for (StackPredicate predicate : required) {
                 int index = getFirstEmptySlot(handler);
@@ -155,14 +160,13 @@ public class CookingPotCookTask implements ICookTask {
 
     @Override
     public List<RecipeData> getAllRecipeData(Level level) {
-        RecipeManager manager = level.getRecipeManager();
         List<RecipeData> ans = new ArrayList<>();
-        for (var holder : manager.getAllRecipesFor(ModRecipeTypes.COOKING.get())) {
+        for (var holder : RecipeAccess.allOf(level, ModRecipeTypes.COOKING.get())) {
             ans.add(new RecipeData(
-                    holder.id(),
+                    holder.id().identifier(),
                     ModRecipeTypes.COOKING.get(),
                     getIcon(),
-                    getResult(holder,level)
+                    holder.value().result()
             ));
         }
 

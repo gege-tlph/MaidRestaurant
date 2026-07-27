@@ -31,7 +31,7 @@ public class MaidSearchCookBlockTask extends MaidCheckRateTask {
             CookRequest request = (CookRequest) RequestManager.peek(maid, CookRequest.TYPE);
             if (request == null) return false;
             ICookTask iCookTask = CookTasks.getTask(request.type);
-            BlockPos pos = iCookTask.searchWorkBlock(level, maid, (int)maid.getRestrictRadius(), this.verticalSearchRange);
+            BlockPos pos = iCookTask.searchWorkBlock(level, maid, (int)maid.searchRadius(), this.verticalSearchRange);
             if (pos != null && pos.distSqr(maid.blockPosition()) <= 4 && MaidStateManager.cookState(maid, level) == MaidStateManager.CookState.COOK) {
                 BehaviorUtils.setTargetPos(maid, new BlockPosTracker(pos), 2);
                 maid.getBrain().setMemory(ModEntities.CHAIR_POS.get(), new BlockPosTracker(maid.blockPosition()));

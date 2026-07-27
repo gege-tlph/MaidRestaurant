@@ -4,13 +4,13 @@ import com.mastermarisa.maid_restaurant.MaidRestaurant;
 import com.mastermarisa.maid_restaurant.client.gui.base.UIButton;
 import com.mastermarisa.maid_restaurant.client.gui.screen.ordering.OrderingScreen;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 
 public class UIOrderButton extends UIButton {
-    private static final ResourceLocation texture = MaidRestaurant.resourceLocation("textures/gui/food_book.png");
+    private static final Identifier texture = MaidRestaurant.resourceLocation("textures/gui/food_book.png");
     public static final int width = 16;
     public static final int height = 16;
     protected final OrderingScreen screen;

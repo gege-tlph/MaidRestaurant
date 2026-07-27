@@ -13,7 +13,7 @@ import com.mastermarisa.maid_restaurant.maid.task.cook.MaidGetFromStorageTask;
 import com.mastermarisa.maid_restaurant.maid.task.cook.MaidSearchCookBlockTask;
 import com.mastermarisa.maid_restaurant.request.CookRequestHandler;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.ai.behavior.BehaviorControl;
 import net.minecraft.world.item.ItemStack;
@@ -22,15 +22,15 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 public class TaskCook implements IMaidTask {
-    public static final ResourceLocation UID = MaidRestaurant.resourceLocation("cook");
+    public static final Identifier UID = MaidRestaurant.resourceLocation("cook");
 
     @Override
-    public ResourceLocation getUid() {
+    public Identifier getUid() {
         return UID;
     }
 
     @Override
-    public ItemStack getIcon() { return ModItems.KITCHEN_SHOVEL.toStack(); }
+    public ItemStack getIcon() { return ModItems.KITCHEN_SHOVEL.getDefaultInstance(); }
 
     @Override
     public boolean enableLookAndRandomWalk(EntityMaid maid) {
@@ -44,7 +44,7 @@ public class TaskCook implements IMaidTask {
 
     @Override
     public @Nullable SoundEvent getAmbientSound(EntityMaid maid) {
-        return InitSounds.MAID_IDLE.get();
+        return InitSounds.MAID_IDLE;
     }
 
     @Override

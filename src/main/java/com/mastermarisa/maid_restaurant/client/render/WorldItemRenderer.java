@@ -12,11 +12,11 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.fml.ModList;
+import net.fabricmc.loader.api.FabricLoader;
 import org.joml.Vector3f;
 
 public class WorldItemRenderer {
-    public static final boolean IRIS_LOADED = ModList.get().isLoaded("iris");
+    public static final boolean IRIS_LOADED = FabricLoader.getInstance().isModLoaded("iris");
 
     public static void renderItemStackTowardPlayer(PoseStack poseStack, MultiBufferSource.BufferSource buffer, Vec3 targetPos
             , Minecraft minecraft, ItemStack itemStack, int packedLight) {

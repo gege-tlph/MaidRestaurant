@@ -6,9 +6,12 @@ import com.mastermarisa.maid_restaurant.api.ICookTask;
 import com.mastermarisa.maid_restaurant.api.request.IRequest;
 import com.mastermarisa.maid_restaurant.utils.CookTasks;
 import com.mastermarisa.maid_restaurant.utils.EncodeUtils;
+import com.mastermarisa.maid_restaurant.utils.RecipeAccess;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -47,7 +50,7 @@ public class ServeRequest implements IRequest {
     @Override
     public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
-        tag.putLongArray("targets",targets.stream().map(BlockPos::asLong).toList());
+        tag.putLongArray("targets",targets.stream().mapToLong(BlockPos::asLong).toArray());
         tag.putString("item",EncodeUtils.encode(toServe).toString());
         tag.putInt("count",toServe.getCount());
         tag.putString("provider", this.provider.toString());
@@ -58,16 +61,16 @@ public class ServeRequest implements IRequest {
 
     @Override
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag) {
-        if (tag.contains("targets")) targets = new LinkedList<>(EncodeUtils.decode(tag.getLongArray("targets")));
-        if (tag.contains("item")) toServe = new ItemStack(EncodeUtils.decode(tag.getString("item")),tag.getInt("count"));
-        if (tag.contains("provider")) this.provider = UUID.fromString(tag.getString("provider"));
-        requested = tag.getInt("requested");
+        if (tag.contains("targets")) targets = new LinkedList<>(EncodeUtils.decode(tag.getLongArray("targets").orElse(new long[0])));
+        if (tag.contains("item")) toServe = new ItemStack(EncodeUtils.decode(tag.getString("item").orElse("")),tag.getInt("count").orElse(0));
+        if (tag.contains("provider")) this.provider = UUID.fromString(tag.getString("provider").orElse(""));
+        requested = tag.getInt("requested").orElse(0);
     }
 
     public static ServeRequest from(Level level, UUID uuid, CookRequest request) {
         ServeRequest serveRequest = new ServeRequest();
         ICookTask iCookTask = CookTasks.getTask(request.type);
-        ItemStack result = iCookTask.getResult(level.getRecipeManager().byKey(request.id).get(),level);
+        ItemStack result = iCookTask.getResult(RecipeAccess.require(level, request.id),level);
         serveRequest.toServe = result.copyWithCount(result.getCount() * request.requested);
         serveRequest.targets = new LinkedList<>(EncodeUtils.decode(request.targets));
         serveRequest.provider = uuid;

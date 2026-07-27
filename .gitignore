@@ -1,5 +1,8 @@
 # Compiled class file
 *.class
+.gradle/
+build/
+run/
 
 # Log file
 *.log
@@ -12,6 +15,7 @@
 
 # Package Files #
 *.jar
+!gradle/wrapper/gradle-wrapper.jar
 *.war
 *.nar
 *.ear

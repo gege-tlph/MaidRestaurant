@@ -1,21 +1,15 @@
 package com.mastermarisa.maid_restaurant.utils;
 
-import com.mastermarisa.maid_restaurant.MaidRestaurant;
 import com.mastermarisa.maid_restaurant.api.ICookTask;
 import com.mastermarisa.maid_restaurant.cooktask.PotCookTask;
 import com.mastermarisa.maid_restaurant.cooktask.SteamerCookTask;
 import com.mastermarisa.maid_restaurant.cooktask.StockpotCookTask;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-@EventBusSubscriber(modid = MaidRestaurant.MOD_ID)
 public class CookTasks {
     private static final ConcurrentHashMap<RecipeType<?>, ICookTask> taskMap;
     private static final ConcurrentHashMap<String, RecipeType<?>> typeMap;
@@ -58,8 +52,4 @@ public class CookTasks {
         register(new SteamerCookTask());
     }
 
-    @SubscribeEvent
-    public static void commonSetup(FMLCommonSetupEvent event){
-        register();
-    }
 }

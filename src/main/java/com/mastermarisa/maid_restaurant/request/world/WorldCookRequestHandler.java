@@ -1,11 +1,13 @@
 package com.mastermarisa.maid_restaurant.request.world;
 
 import com.mastermarisa.maid_restaurant.api.request.RequestHandler;
-import com.mastermarisa.maid_restaurant.api.request.RequestSyncer;
 import com.mastermarisa.maid_restaurant.request.CookRequest;
+import com.mastermarisa.maid_restaurant.utils.TaskDataKeys;
+import cn.sh1rocu.touhoulittlemaid.api.entity.data.TaskDataKey;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.neoforged.neoforge.attachment.AttachmentType;
 
 public class WorldCookRequestHandler extends RequestHandler<CookRequest> {
     @Override
@@ -15,6 +17,15 @@ public class WorldCookRequestHandler extends RequestHandler<CookRequest> {
         return request;
     }
 
-    public static final AttachmentType<WorldCookRequestHandler> TYPE = AttachmentType.
-            serializable(WorldCookRequestHandler::new).sync(new RequestSyncer<>(WorldCookRequestHandler::new)).build();
+    public static final TaskDataKey<WorldCookRequestHandler> TYPE = TaskDataKeys.create(
+            "world_cook_request_handler", WorldCookRequestHandler::new,
+            value -> value.serializeNBT(null),
+            tag -> {
+                WorldCookRequestHandler value = new WorldCookRequestHandler();
+                value.deserializeNBT(null, tag);
+                return value;
+            });
+    public static final AttachmentType<WorldCookRequestHandler> ATTACHMENT = AttachmentRegistry.createDefaulted(
+            net.minecraft.resources.Identifier.fromNamespaceAndPath("maid_restaurant", "world_cook_request_handler"),
+            WorldCookRequestHandler::new);
 }

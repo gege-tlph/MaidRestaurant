@@ -13,7 +13,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.network.PacketDistributor;
+import com.mastermarisa.maid_restaurant.network.NetworkHandler;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.awt.*;
@@ -103,7 +103,7 @@ public class UICookRequest extends UIElement {
             if (!screen.checkAvailability()) return;
             attributes.setCycle(!attributes.cycle());
             ModifyAttributePayload payload = new ModifyAttributePayload(0,screen.maid.getUUID(),index,attributes.getAttributes());
-            PacketDistributor.sendToServer(payload);
+            NetworkHandler.sendToServer(payload);
         }
     }
 
@@ -153,7 +153,7 @@ public class UICookRequest extends UIElement {
             attributes.getAttributes()[1]++;
             if (attributes.getAttributes()[1] > 2) attributes.getAttributes()[1] = 0;
             ModifyAttributePayload payload = new ModifyAttributePayload(0,screen.maid.getUUID(),index,attributes.getAttributes());
-            PacketDistributor.sendToServer(payload);
+            NetworkHandler.sendToServer(payload);
         }
     }
 }

@@ -1,9 +1,9 @@
 package com.mastermarisa.maid_restaurant.compat.bakeries;
 
-import net.neoforged.fml.ModList;
+import net.fabricmc.loader.api.FabricLoader;
 
 public class BakeriesCompat {
-    public static final boolean LOADED = ModList.get().isLoaded("bakeries");
+    public static final boolean LOADED = FabricLoader.getInstance().isModLoaded("bakeries");
 
     public static void register() {
         if (LOADED) {

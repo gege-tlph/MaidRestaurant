@@ -6,7 +6,7 @@ import com.mastermarisa.maid_restaurant.client.gui.base.UIImage;
 import com.mastermarisa.maid_restaurant.client.gui.screen.cook_request.CookRequestScreen;
 import com.mastermarisa.maid_restaurant.network.CancelRequestPayload;
 import net.minecraft.client.gui.GuiGraphics;
-import net.neoforged.neoforge.network.PacketDistributor;
+import com.mastermarisa.maid_restaurant.network.NetworkHandler;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.awt.*;
@@ -38,7 +38,7 @@ public class UICancelRequestButton extends UIButton {
 
         screen.handler.removeAt(index);
         CancelRequestPayload payload = new CancelRequestPayload(0,screen.maid.getUUID(),index);
-        PacketDistributor.sendToServer(payload);
+        NetworkHandler.sendToServer(payload);
 
         screen.initRequests();
     }

@@ -1,22 +1,12 @@
 package com.mastermarisa.maid_restaurant.init;
 
 import com.mastermarisa.maid_restaurant.advancements.rewards.GivePatchouliBookConfigTrigger;
-import net.minecraft.advancements.CriterionTrigger;
-import net.minecraft.core.registries.Registries;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import com.mastermarisa.maid_restaurant.utils.RegistryRef;
 
-public class ModTrigger {
-    private static final DeferredRegister<CriterionTrigger<?>> TRIGGERS;
-    public static final DeferredHolder<CriterionTrigger<?>, GivePatchouliBookConfigTrigger> GIVE_PATCHOULI_BOOK_CONFIG;
+public final class ModTrigger {
+    public static final RegistryRef<GivePatchouliBookConfigTrigger> GIVE_PATCHOULI_BOOK_CONFIG =
+            new RegistryRef<>(new GivePatchouliBookConfigTrigger());
 
-    static {
-        TRIGGERS = DeferredRegister.create(Registries.TRIGGER_TYPE, "maid_restaurant");
-        GIVE_PATCHOULI_BOOK_CONFIG = TRIGGERS.register("give_patchouli_book_config", GivePatchouliBookConfigTrigger::new);
-    }
-
-    public static void register(IEventBus mod) {
-        TRIGGERS.register(mod);
+    public static void register() {
     }
 }

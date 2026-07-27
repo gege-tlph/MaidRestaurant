@@ -3,10 +3,11 @@ package com.mastermarisa.maid_restaurant.storage;
 import com.github.ysbbbbbb.kaleidoscopecookery.blockentity.decoration.TableBlockEntity;
 import com.github.ysbbbbbb.kaleidoscopecookery.init.ModItems;
 import com.mastermarisa.maid_restaurant.api.IMaidStorage;
+import com.mastermarisa.maid_restaurant.utils.ListItemHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.items.IItemHandler;
+import cn.sh1rocu.touhoulittlemaid.util.itemhandler.IItemHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,7 +20,7 @@ public class TableStorage implements IMaidStorage {
     public String getUID() { return UID; }
 
     @Override
-    public ItemStack getIcon() { return new ItemStack(ModItems.TABLE_OAK.get()); }
+    public ItemStack getIcon() { return new ItemStack(ModItems.TABLE_OAK); }
 
     @Override
     public boolean isValid(Level level, BlockPos pos) {
@@ -29,7 +30,7 @@ public class TableStorage implements IMaidStorage {
     @Override
     public @Nullable IItemHandler getHandler(Level level, BlockPos pos) {
         if (level.getBlockEntity(pos) instanceof TableBlockEntity table && level.getBlockState(pos.immutable().above()).canBeReplaced()) {
-            return table.getItems();
+            return new ListItemHandler(table.getItems());
         }
 
         return null;

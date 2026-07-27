@@ -14,12 +14,12 @@ import com.github.ysbbbbbb.kaleidoscopecookery.util.ItemUtils;
 import com.mastermarisa.maid_restaurant.api.ICookTask;
 import com.mastermarisa.maid_restaurant.request.CookRequest;
 import com.mastermarisa.maid_restaurant.utils.BlockUsageManager;
-import com.mastermarisa.maid_restaurant.utils.FakePlayerUtils;
 import com.mastermarisa.maid_restaurant.utils.ItemHandlerUtils;
+import com.mastermarisa.maid_restaurant.utils.RecipeAccess;
 import com.mastermarisa.maid_restaurant.utils.component.RecipeData;
 import com.mastermarisa.maid_restaurant.utils.component.StackPredicate;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
@@ -29,7 +29,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.common.util.FakePlayer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -48,7 +47,7 @@ public class StockpotCookTask implements ICookTask {
 
     @Override
     public ItemStack getIcon() {
-        return ModItems.STOCKPOT.toStack();
+        return ModItems.STOCKPOT.getDefaultInstance();
     }
 
     @Override
@@ -77,8 +76,10 @@ public class StockpotCookTask implements ICookTask {
                 ans.add(pot.getSoupBase().getDisplayStack());
             if (pot.getStatus() == 3) {
                 StockpotRecipe recipe = pot.recipe.value();
-                recipe.getIngredients().stream().filter(i -> i.getItems().length > 0).forEach(s -> ans.add(s.getItems()[0]));
-                ans.add(recipe.carrier().getItems()[0].copyWithCount(recipe.result().getCount() - pot.getTakeoutCount()));
+                recipe.getIngredients().stream().filter(i -> i.items().findAny().isPresent())
+                        .forEach(s -> s.items().findFirst().ifPresent(item -> ans.add(new ItemStack(item.value()))));
+                recipe.carrier().items().findFirst().ifPresent(item ->
+                        ans.add(new ItemStack(item.value(), recipe.result().getCount() - pot.getTakeoutCount())));
                 ans.add(SoupBaseManager.getSoupBase(recipe.soupBase()).getDisplayStack());
             }
         }
@@ -90,8 +91,8 @@ public class StockpotCookTask implements ICookTask {
     public @Nullable BlockPos searchWorkBlock(ServerLevel level, EntityMaid maid, int horizontalSearchRange, int verticalSearchRange) {
         BlockPos blockPos = maid.getBrainSearchPos();
         PoiManager poiManager = level.getPoiManager();
-        int range = (int) maid.getRestrictRadius();
-        return poiManager.getInRange((type)-> type.value().equals(ModPoi.STOCKPOT.get()), blockPos, range, PoiManager.Occupancy.ANY)
+        int range = (int) maid.searchRadius();
+        return poiManager.getInRange((type)-> type.value().equals(ModPoi.STOCKPOT), blockPos, range, PoiManager.Occupancy.ANY)
                 .map(PoiRecord::getPos).filter((pos)-> BlockUsageManager.getUserCount(pos) <= 0).min(Comparator.comparingDouble(pos -> pos.distSqr(maid.blockPosition()))).orElse(null);
     }
 
@@ -121,11 +122,10 @@ public class StockpotCookTask implements ICookTask {
 
     @Override
     public List<RecipeData> getAllRecipeData(Level level) {
-        RecipeManager manager = level.getRecipeManager();
         List<RecipeData> ans = new ArrayList<>();
-        for (var holder : manager.getAllRecipesFor(ModRecipes.STOCKPOT_RECIPE)) {
+        for (var holder : RecipeAccess.allOf(level, ModRecipes.STOCKPOT_RECIPE)) {
             if (!blackList.contains(holder.id().toString()))
-                ans.add(new RecipeData(holder.id(),ModRecipes.STOCKPOT_RECIPE,getIcon(),holder.value().result()));
+                ans.add(new RecipeData(holder.id().identifier(),ModRecipes.STOCKPOT_RECIPE,getIcon(),holder.value().result()));
         }
         return ans;
     }
@@ -134,16 +134,14 @@ public class StockpotCookTask implements ICookTask {
         if (pot.hasLid())
             takeLid(level,maid,pos,pot);
         else {
-            StockpotRecipe recipe = level.getRecipeManager().byKeyTyped(ModRecipes.STOCKPOT_RECIPE,request.id).value();
-            ResourceLocation soupBase = recipe.soupBase();
+            StockpotRecipe recipe = RecipeAccess.<StockpotRecipe>require(level, request.id).value();
+            Identifier soupBase = recipe.soupBase();
             ISoupBase iSoupBase = SoupBaseManager.getSoupBase(soupBase);
 
             if (soupBase.equals(ModSoupBases.WATER)) {
                 int count = ItemHandlerUtils.count(maid.getAvailableInv(false),StackPredicate.of(iSoupBase::isSoupBase));
                 if (count >= 2) {
-                    FakePlayer fakePlayer = FakePlayerUtils.getPlayer(level);
-                    pot.addSoupBase(level,fakePlayer,new ItemStack(Items.WATER_BUCKET));
-                    fakePlayer.getInventory().clearContent();
+                    pot.addSoupBase(level, maid, new ItemStack(Items.WATER_BUCKET));
                     maid.swing(InteractionHand.OFF_HAND);
                     return;
                 }
@@ -161,13 +159,13 @@ public class StockpotCookTask implements ICookTask {
         if (pot.hasLid())
             takeLid(level,maid,pos,pot);
         else {
-            StockpotRecipe recipe = level.getRecipeManager().byKeyTyped(ModRecipes.STOCKPOT_RECIPE,request.id).value();
+            StockpotRecipe recipe = RecipeAccess.<StockpotRecipe>require(level, request.id).value();
             List<StackPredicate> required = new ArrayList<>(recipe.ingredients().stream().filter(s->!s.isEmpty()).map(StackPredicate::new).toList());
             required = ItemHandlerUtils.getRequired(required,pot.getInputs());
             if (required.isEmpty()) {
-                ItemStack lid = ItemHandlerUtils.tryExtractSingleSlot(maid.getAvailableInv(false),1,StackPredicate.of(ModItems.STOCKPOT_LID.asItem()),true);
+                ItemStack lid = ItemHandlerUtils.tryExtractSingleSlot(maid.getAvailableInv(false),1,StackPredicate.of(ModItems.STOCKPOT_LID),true);
                 if (!lid.isEmpty()) {
-                    pot.onLitClick(level,maid,lid);
+                    pot.onLidClick(level,maid,lid);
                     maid.swing(InteractionHand.OFF_HAND);
                 }
             } else {
@@ -184,9 +182,9 @@ public class StockpotCookTask implements ICookTask {
 
     protected void tickState2(ServerLevel level, EntityMaid maid, BlockPos pos, StockpotBlockEntity pot, CookRequest request) {
         if (!pot.hasLid()) {
-            ItemStack lid = ItemHandlerUtils.tryExtractSingleSlot(maid.getAvailableInv(false),1,StackPredicate.of(ModItems.STOCKPOT_LID.asItem()),true);
+            ItemStack lid = ItemHandlerUtils.tryExtractSingleSlot(maid.getAvailableInv(false),1,StackPredicate.of(ModItems.STOCKPOT_LID),true);
             if (!lid.isEmpty()) {
-                pot.onLitClick(level,maid,lid);
+                pot.onLidClick(level,maid,lid);
                 maid.swing(InteractionHand.OFF_HAND);
             }
         }
@@ -196,7 +194,7 @@ public class StockpotCookTask implements ICookTask {
         if (pot.hasLid()) {
             takeLid(level,maid,pos,pot);
         } else {
-            StockpotRecipe recipe = level.getRecipeManager().byKeyTyped(ModRecipes.STOCKPOT_RECIPE,request.id).value();
+            StockpotRecipe recipe = RecipeAccess.<StockpotRecipe>require(level, request.id).value();
             ItemStack carrier = ItemHandlerUtils.tryExtractSingleSlot(maid.getAvailableInv(false),1,StackPredicate.of(recipe.carrier()),true);
             if (!carrier.isEmpty()) {
                 pot.takeOutProduct(level,maid,carrier);
@@ -208,7 +206,7 @@ public class StockpotCookTask implements ICookTask {
     }
 
     private void takeLid(ServerLevel level, EntityMaid maid, BlockPos pos, StockpotBlockEntity pot) {
-        ItemStack lid = pot.getLidItem().isEmpty() ? (ModItems.STOCKPOT_LID.get()).getDefaultInstance() : pot.getLidItem().copy();
+        ItemStack lid = pot.getLidItem().isEmpty() ? ModItems.STOCKPOT_LID.getDefaultInstance() : pot.getLidItem().copy();
         pot.setLidItem(ItemStack.EMPTY);
         pot.setChanged();
         level.setBlockAndUpdate(pos,level.getBlockState(pos).setValue(StockpotBlock.HAS_LID, false));

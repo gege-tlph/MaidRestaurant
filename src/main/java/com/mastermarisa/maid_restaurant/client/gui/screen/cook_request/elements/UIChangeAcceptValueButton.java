@@ -9,7 +9,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.network.PacketDistributor;
+import com.mastermarisa.maid_restaurant.network.NetworkHandler;
 
 import java.awt.*;
 import java.util.List;
@@ -50,6 +50,6 @@ public class UIChangeAcceptValueButton extends UIButton {
         handler.accept = !handler.accept;
 
         ChangeHandlerAcceptValuePayload payload = new ChangeHandlerAcceptValuePayload(type,uuid,handler.accept);
-        PacketDistributor.sendToServer(payload);
+        NetworkHandler.sendToServer(payload);
     }
 }

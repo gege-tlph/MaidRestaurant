@@ -64,8 +64,8 @@ public class MaidApproachCookBlockTask extends MaidCheckRateTask implements ISte
     private boolean search(ServerLevel level, EntityMaid maid) {
         CookRequest request = Objects.requireNonNull((CookRequest) RequestManager.peek(maid,CookRequest.TYPE));
         ICookTask iCookTask = CookTasks.getTask(request.type);
-        BlockPos pos = iCookTask.searchWorkBlock(level,maid,(int)maid.getRestrictRadius(),verticalSearchRange);
-        if (pos != null && maid.isWithinRestriction(pos)) {
+        BlockPos pos = iCookTask.searchWorkBlock(level,maid,(int)maid.searchRadius(),verticalSearchRange);
+        if (pos != null && pos.distSqr(maid.getBrainSearchPos()) <= Math.pow(maid.searchRadius(), 2)) {
             List<BlockPos> possible = getPossibleChairPos(pos);
             for (BlockPos chair : possible){
                 if (level.getBlockState(chair).is(TagBlock.SIT_BLOCK) && isChairAvailable(level,maid,chair)){

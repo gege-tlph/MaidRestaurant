@@ -13,7 +13,7 @@ import com.mastermarisa.maid_restaurant.request.ServeRequestHandler;
 import com.mastermarisa.maid_restaurant.utils.MaidStorages;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.ai.behavior.BehaviorControl;
 import net.minecraft.world.item.ItemStack;
@@ -23,20 +23,20 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 public class TaskWaiter implements IMaidTask {
-    public static final ResourceLocation UID = MaidRestaurant.resourceLocation("waiter");
+    public static final Identifier UID = MaidRestaurant.resourceLocation("waiter");
 
-    public ResourceLocation getUid() {
+    public Identifier getUid() {
         return UID;
     }
 
-    public ItemStack getIcon() { return ModItems.FRUIT_BASKET.toStack(); }
+    public ItemStack getIcon() { return ModItems.FRUIT_BASKET.getDefaultInstance(); }
 
     public boolean enableLookAndRandomWalk(EntityMaid maid) {
         return false;
     }
 
     public @Nullable SoundEvent getAmbientSound(EntityMaid maid) {
-        return InitSounds.MAID_IDLE.get();
+        return InitSounds.MAID_IDLE;
     }
 
     public boolean enableEating(EntityMaid maid) {

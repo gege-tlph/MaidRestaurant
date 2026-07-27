@@ -1,10 +1,10 @@
 package com.mastermarisa.maid_restaurant.request;
 
 import com.mastermarisa.maid_restaurant.api.request.RequestHandler;
-import com.mastermarisa.maid_restaurant.api.request.RequestSyncer;
+import com.mastermarisa.maid_restaurant.utils.TaskDataKeys;
+import cn.sh1rocu.touhoulittlemaid.api.entity.data.TaskDataKey;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.neoforged.neoforge.attachment.AttachmentType;
 
 public class ServeRequestHandler extends RequestHandler<ServeRequest> {
     @Override
@@ -14,6 +14,12 @@ public class ServeRequestHandler extends RequestHandler<ServeRequest> {
         return request;
     }
 
-    public static final AttachmentType<ServeRequestHandler> TYPE = AttachmentType.
-            serializable(ServeRequestHandler::new).sync(new RequestSyncer<>(ServeRequestHandler::new)).build();
+    public static final TaskDataKey<ServeRequestHandler> TYPE = TaskDataKeys.create(
+            "serve_request_handler", ServeRequestHandler::new,
+            value -> value.serializeNBT(null),
+            tag -> {
+                ServeRequestHandler value = new ServeRequestHandler();
+                value.deserializeNBT(null, tag);
+                return value;
+            });
 }

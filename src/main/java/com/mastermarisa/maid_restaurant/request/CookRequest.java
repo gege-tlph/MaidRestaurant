@@ -13,18 +13,20 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.items.ItemStackHandler;
+import cn.sh1rocu.touhoulittlemaid.util.itemhandler.ItemStackHandler;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,7 +36,7 @@ import java.util.stream.Collectors;
 public class CookRequest implements IRequest {
     public static final int TYPE = 0;
 
-    public ResourceLocation id;
+    public Identifier id;
     public RecipeType<?> type;
     public int remain;
     public int requested;
@@ -44,7 +46,7 @@ public class CookRequest implements IRequest {
 
     public CookRequest() {}
 
-    public CookRequest(ResourceLocation id, RecipeType<?> type, int remain, int requested, long[] targets, byte[] attributes) {
+    public CookRequest(Identifier id, RecipeType<?> type, int remain, int requested, long[] targets, byte[] attributes) {
         this.id = id;
         this.type = type;
         this.remain = remain;
@@ -70,13 +72,13 @@ public class CookRequest implements IRequest {
     @Override
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag) {
         if (tag.contains("id")) {
-            id = ResourceLocation.parse(tag.getString("id"));
-            type = CookTasks.getType(tag.getString("type"));
-            remain = tag.getInt("remain");
-            requested = tag.getInt("requested");
-            targets = tag.getLongArray("targets");
-            attributes = new Attributes(tag.getByteArray("attributes"));
-            extraData = tag.getCompound("extra");
+            id = Identifier.parse(tag.getString("id").orElse(""));
+            type = CookTasks.getType(tag.getString("type").orElse(""));
+            remain = tag.getInt("remain").orElse(0);
+            requested = tag.getInt("requested").orElse(0);
+            targets = tag.getLongArray("targets").orElse(new long[0]);
+            attributes = new Attributes(tag.getByteArray("attributes").orElse(new byte[0]));
+            extraData = tag.getCompound("extra").orElse(new CompoundTag());
         }
     }
 
@@ -88,7 +90,7 @@ public class CookRequest implements IRequest {
             }
             case SPACE_ENOUGH -> {
                 ICookTask iCookTask = CookTasks.getTask(type);
-                ItemStack result = iCookTask.getResult(level.getRecipeManager().byKey(id).get(),level);
+                ItemStack result = iCookTask.getResult(level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, id)).orElseThrow(),level);
                 boolean block = result.getItem() instanceof BlockItem;
                 int slot = 0;
                 for (int i = 0;i < targets.length && slot < requested * result.getCount();i++) {
@@ -122,10 +124,10 @@ public class CookRequest implements IRequest {
         return true;
     }
 
-    private static int getEmptySlots(ItemStackHandler itemStackHandler) {
+    private static int getEmptySlots(java.util.List<ItemStack> itemStackHandler) {
         int count = 0;
-        for (int i = 0;i < itemStackHandler.getSlots();i++)
-            if (itemStackHandler.getStackInSlot(i).isEmpty())
+        for (ItemStack stack : itemStackHandler)
+            if (stack.isEmpty())
                 count++;
 
         return count;
@@ -137,7 +139,7 @@ public class CookRequest implements IRequest {
         BlockState state = level.getBlockState(pos);
         BlockEntity blockEntity = level.getBlockEntity(pos);
         if (blockEntity instanceof TableBlockEntity table)
-            return level.getBlockState(pos.immutable().above()).canBeReplaced() && table.getItems().getStackInSlot(3).isEmpty();
+            return level.getBlockState(pos.immutable().above()).canBeReplaced() && table.getItems().get(3).isEmpty();
 
         if (state.is(TagBlock.SERVE_MEAL_BLOCK) && level.getBlockState(pos.immutable().above()).canBeReplaced())
             return true;
@@ -145,7 +147,7 @@ public class CookRequest implements IRequest {
         IMaidStorage storage = MaidStorages.tryGetType(level,pos);
         if (storage != null) {
             ICookTask iCookTask = CookTasks.getTask(type);
-            ItemStack result = iCookTask.getResult(level.getRecipeManager().byKey(id).get(),level);
+            ItemStack result = iCookTask.getResult(level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, id)).orElseThrow(),level);
             return result.getCount() != storage.insert(level,pos,result.copy(),true).getCount();
         }
 

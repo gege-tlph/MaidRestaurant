@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "maid_restaurant",
+  "version": "${version}",
+  "name": "Maid Restaurant",
+  "description": "An addon mod designed to deliver a restaurant-style automatic experience with maids.",
+  "authors": ["MasterMarisa"],
+  "contact": {
+    "sources": "https://github.com/gege-tlph/MaidRestaurant"
+  },
+  "license": "BSD-3-Clause",
+  "icon": "logo.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.mastermarisa.maid_restaurant.MaidRestaurant"
+    ],
+    "client": [
+      "com.mastermarisa.maid_restaurant.client.MaidRestaurantClient"
+    ],
+    "fabric-datagen": [
+      "com.mastermarisa.maid_restaurant.data.DataGenerators"
+    ],
+    "little_maid_extension": [
+      "com.mastermarisa.maid_restaurant.maid.init.MaidPlugin"
+    ]
+  },
+  "mixins": [
+    "maid_restaurant.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.18.1",
+    "minecraft": "1.21.11",
+    "fabric-api": "*",
+    "touhou_little_maid": "*",
+    "kaleidoscope_cookery": "*"
+  },
+  "suggests": {
+    "patchouli": "*",
+    "farmersdelight": "*",
+    "bakeries": "*"
+  }
+}

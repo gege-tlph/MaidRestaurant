@@ -11,8 +11,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
+import cn.sh1rocu.touhoulittlemaid.util.itemhandler.IItemHandler;
+import cn.sh1rocu.touhoulittlemaid.util.itemhandler.ItemHandlerHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;

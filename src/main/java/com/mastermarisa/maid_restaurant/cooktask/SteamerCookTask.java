@@ -11,6 +11,7 @@ import com.mastermarisa.maid_restaurant.request.CookRequest;
 import com.mastermarisa.maid_restaurant.utils.BlockUsageManager;
 import com.mastermarisa.maid_restaurant.utils.ItemHandlerUtils;
 import com.mastermarisa.maid_restaurant.utils.RequestManager;
+import com.mastermarisa.maid_restaurant.utils.RecipeAccess;
 import com.mastermarisa.maid_restaurant.utils.SearchUtils;
 import com.mastermarisa.maid_restaurant.utils.component.RecipeData;
 import com.mastermarisa.maid_restaurant.utils.component.StackPredicate;
@@ -24,7 +25,7 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
+import cn.sh1rocu.touhoulittlemaid.util.itemhandler.ItemHandlerHelper;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -38,7 +39,7 @@ public class SteamerCookTask implements ICookTask {
     public String getUID() { return UID; }
 
     @Override
-    public ItemStack getIcon() { return new ItemStack(ModItems.STEAMER.get()); }
+    public ItemStack getIcon() { return new ItemStack(ModItems.STEAMER); }
 
     @Override
     public RecipeType<?> getType() { return ModRecipes.STEAMER_RECIPE; }
@@ -54,7 +55,7 @@ public class SteamerCookTask implements ICookTask {
         List<SteamerBlockEntity> steamers = getSteamers(level,pos);
         CookRequest request = (CookRequest) RequestManager.peek(maid,CookRequest.TYPE);
         if (request == null) return ans;
-        SteamerRecipe recipe = level.getRecipeManager().byKeyTyped(ModRecipes.STEAMER_RECIPE,request.id).value();
+        SteamerRecipe recipe = RecipeAccess.<SteamerRecipe>require(level, request.id).value();
 
         for (SteamerBlockEntity steamer : steamers) {
             NonNullList<ItemStack> items = steamer.getItems();
@@ -62,7 +63,7 @@ public class SteamerCookTask implements ICookTask {
                 if (recipe.getIngredient().test(item))
                     ans.add(item);
                 else if (item.is(recipe.getResult().getItem()))
-                    ans.add(recipe.getIngredient().getItems()[0]);
+                    recipe.getIngredient().items().findFirst().ifPresent(ingredientHolder -> ans.add(new ItemStack(ingredientHolder.value())));
         }
 
         return ans;
@@ -90,7 +91,7 @@ public class SteamerCookTask implements ICookTask {
     @Override
     public void cookTick(ServerLevel level, EntityMaid maid, BlockPos pos, CookRequest request) {
         List<SteamerBlockEntity> steamers = getSteamers(level,pos);
-        SteamerRecipe recipe = level.getRecipeManager().byKeyTyped(ModRecipes.STEAMER_RECIPE,request.id).value();
+        SteamerRecipe recipe = RecipeAccess.<SteamerRecipe>require(level, request.id).value();
         for (SteamerBlockEntity steamer : steamers) {
             if (request.remain <= 0) break;
             NonNullList<ItemStack> items = steamer.getItems();
@@ -109,7 +110,7 @@ public class SteamerCookTask implements ICookTask {
                         if (request.remain <= 0) break;
                     }
                 } else if (item.isEmpty()) {
-                    int requested = request.extraData.getInt("left");
+                    int requested = request.extraData.getInt("left").orElse(0);
                     if (requested < request.requested) {
                         ItemStack ingredient = ItemHandlerUtils.tryExtractSingleSlot(maid.getAvailableInv(false),1, StackPredicate.of(recipe.getIngredient()),true);
                         if (!ingredient.isEmpty()) {
@@ -130,10 +131,9 @@ public class SteamerCookTask implements ICookTask {
 
     @Override
     public List<RecipeData> getAllRecipeData(Level level) {
-        RecipeManager manager = level.getRecipeManager();
         List<RecipeData> ans = new ArrayList<>();
-        for (var holder : manager.getAllRecipesFor(ModRecipes.STEAMER_RECIPE)) {
-            ans.add(new RecipeData(holder.id(),ModRecipes.STEAMER_RECIPE,getIcon(),holder.value().getResult()));
+        for (var holder : RecipeAccess.allOf(level, ModRecipes.STEAMER_RECIPE)) {
+            ans.add(new RecipeData(holder.id().identifier(),ModRecipes.STEAMER_RECIPE,getIcon(),holder.value().getResult()));
         }
         return ans;
     }

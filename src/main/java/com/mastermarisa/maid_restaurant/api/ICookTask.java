@@ -25,7 +25,7 @@ public interface ICookTask {
     RecipeType<?> getType();
 
     default List<StackPredicate> getIngredients(RecipeHolder<? extends Recipe<?>> recipeHolder, Level level) {
-        return recipeHolder.value().getIngredients().stream().filter(i -> !i.isEmpty() && i.getItems().length > 0).map(StackPredicate::new).collect(Collectors.toList());
+        return new ArrayList<>();
     }
 
     default List<StackPredicate> getKitchenWares() {
@@ -33,7 +33,7 @@ public interface ICookTask {
     }
 
     default ItemStack getResult(RecipeHolder<? extends Recipe<?>> recipeHolder, Level level) {
-        return recipeHolder.value().getResultItem(level.registryAccess());
+        return ItemStack.EMPTY;
     }
 
     List<ItemStack> getCurrentInput(Level level, BlockPos pos, EntityMaid maid);

@@ -9,10 +9,10 @@ import com.mastermarisa.maid_restaurant.network.SendOrderPayload;
 import com.mastermarisa.maid_restaurant.utils.CookTasks;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.network.PacketDistributor;
+import com.mastermarisa.maid_restaurant.network.NetworkHandler;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -125,7 +125,7 @@ public class UIConfirmTag extends UIElement {
     }
 
     public static class UIConfirmButton extends UIButton {
-        private static final ResourceLocation texture = MaidRestaurant.resourceLocation("textures/gui/confirm.png");
+        private static final Identifier texture = MaidRestaurant.resourceLocation("textures/gui/confirm.png");
         private final OrderingScreen screen;
         private final UICycleButton cycle;
         private final UIStockingModeButton stocking;
@@ -166,7 +166,7 @@ public class UIConfirmTag extends UIElement {
             }
 
             SendOrderPayload payload = new SendOrderPayload(recipeIDs,recipeTypes,counts,tables,attributes);
-            PacketDistributor.sendToServer(payload);
+            NetworkHandler.sendToServer(payload);
 
             screen.close();
         }

@@ -9,9 +9,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
+import cn.sh1rocu.touhoulittlemaid.util.itemhandler.IItemHandler;
+import cn.sh1rocu.touhoulittlemaid.util.itemhandler.InvWrapper;
+import cn.sh1rocu.touhoulittlemaid.util.itemhandler.ItemHandlerHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,7 +34,9 @@ public class CommonStorage implements IMaidStorage {
         BlockState state = level.getBlockState(pos);
         if (state.is(TagBlock.STORAGE_BLOCK)) {
             BlockEntity blockEntity = level.getBlockEntity(pos);
-            if (blockEntity != null) return level.getCapability(Capabilities.ItemHandler.BLOCK, pos, level.getBlockState(pos), blockEntity, null);
+            if (blockEntity instanceof net.minecraft.world.Container container) {
+                return new InvWrapper(container);
+            }
         }
 
         return null;

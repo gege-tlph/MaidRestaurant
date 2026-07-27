@@ -4,9 +4,8 @@ import com.github.tartaricacid.touhoulittlemaid.entity.item.EntitySit;
 import com.mastermarisa.maid_restaurant.MaidRestaurant;
 import com.mastermarisa.maid_restaurant.data.TagBlock;
 import javax.annotation.ParametersAreNonnullByDefault;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
@@ -20,9 +19,11 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.resources.ResourceKey;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class SitEntity extends Entity {
     public static final EntityType<Entity> TYPE;
     private int passengerTick;
@@ -55,14 +56,14 @@ public class SitEntity extends Entity {
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
     }
 
-    protected void readAdditionalSaveData(CompoundTag tag) {
+    protected void readAdditionalSaveData(ValueInput tag) {
     }
 
-    protected void addAdditionalSaveData(CompoundTag tag) {
+    protected void addAdditionalSaveData(ValueOutput tag) {
     }
 
     public void tick() {
-        if (!this.level().isClientSide) {
+        if (!this.level().isClientSide()) {
             this.checkBelowWorld();
             this.checkPassengers();
             if (this.tickCount % 20 == 0) {
@@ -92,7 +93,7 @@ public class SitEntity extends Entity {
         return true;
     }
 
-    public boolean hurt(DamageSource damageSource, float damageAmount) {
+    public boolean hurtServer(ServerLevel level, DamageSource damageSource, float damageAmount) {
         return false;
     }
 
@@ -140,6 +141,7 @@ public class SitEntity extends Entity {
     }
 
     static {
-        TYPE = EntityType.Builder.of(SitEntity::new, MobCategory.MISC).sized(0.5F, 0.1F).clientTrackingRange(10).fireImmune().noSummon().build(MaidRestaurant.resourceLocation("sit_entity").toString());
+        TYPE = EntityType.Builder.of(SitEntity::new, MobCategory.MISC).sized(0.5F, 0.1F).clientTrackingRange(10).fireImmune().noSummon()
+                .build(ResourceKey.create(Registries.ENTITY_TYPE, MaidRestaurant.resourceLocation("sit_entity")));
     }
 }

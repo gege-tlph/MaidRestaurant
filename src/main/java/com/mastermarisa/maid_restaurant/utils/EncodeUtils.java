@@ -2,27 +2,31 @@ package com.mastermarisa.maid_restaurant.utils;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class EncodeUtils {
-    public static ResourceLocation encode(Item item){
+    public static Identifier encode(Item item){
         return BuiltInRegistries.ITEM.getKey(item);
     }
 
-    public static ResourceLocation encode(ItemStack stack){
+    public static Identifier encode(ItemStack stack){
         return BuiltInRegistries.ITEM.getKey(stack.getItem());
     }
 
-    public static Item decode(String key){ return BuiltInRegistries.ITEM.get(ResourceLocation.tryParse(key)); }
+    public static Item decode(String key){
+        Identifier id = Identifier.tryParse(key);
+        return id == null ? Items.AIR : BuiltInRegistries.ITEM.getOptional(id).orElse(Items.AIR);
+    }
 
-    public static Item decode(ResourceLocation key){
-        return BuiltInRegistries.ITEM.get(key);
+    public static Item decode(Identifier key){
+        return BuiltInRegistries.ITEM.getOptional(key).orElse(Items.AIR);
     }
 
     public static List<BlockPos> decode(long[] packed) {

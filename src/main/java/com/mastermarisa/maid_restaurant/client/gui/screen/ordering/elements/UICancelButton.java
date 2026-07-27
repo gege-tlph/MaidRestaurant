@@ -4,13 +4,13 @@ import com.mastermarisa.maid_restaurant.MaidRestaurant;
 import com.mastermarisa.maid_restaurant.client.gui.base.UIButton;
 import com.mastermarisa.maid_restaurant.client.gui.screen.ordering.OrderingScreen;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 
 public class UICancelButton extends UIButton {
-    private static final ResourceLocation texture = MaidRestaurant.resourceLocation("textures/gui/cross.png");
+    private static final Identifier texture = MaidRestaurant.resourceLocation("textures/gui/cross.png");
     private final OrderingScreen screen;
     private final int index;
 

@@ -15,8 +15,8 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
-import net.neoforged.neoforge.items.ItemStackHandler;
+import cn.sh1rocu.touhoulittlemaid.util.itemhandler.ItemHandlerHelper;
+import cn.sh1rocu.touhoulittlemaid.util.itemhandler.ItemStackHandler;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;

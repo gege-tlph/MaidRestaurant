@@ -27,7 +27,8 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.items.ItemStackHandler;
+import cn.sh1rocu.touhoulittlemaid.util.itemhandler.IItemHandler;
+import com.mastermarisa.maid_restaurant.utils.ListItemHandler;
 
 import java.util.Objects;
 
@@ -108,7 +109,7 @@ public class MaidServeMealTask extends MaidTickRateTask implements IStep {
                 return;
             }
             if (level.getBlockEntity(pos) instanceof TableBlockEntity table) {
-                ItemStackHandler tableItems = table.getItems();
+            IItemHandler tableItems = new ListItemHandler(table.getItems());
                 int count = getEmptySlots(tableItems);
 
                 if (count == tableItems.getSlots()) {
@@ -166,11 +167,11 @@ public class MaidServeMealTask extends MaidTickRateTask implements IStep {
     }
 
     private static void serveMealItemToTable(ServerLevel level, EntityMaid maid, ServeRequest request, BlockPos pos, TableBlockEntity table, ItemStack meal) {
-        ItemStackHandler tableItems = table.getItems();
+        IItemHandler tableItems = new ListItemHandler(table.getItems());
         int tableIndex = tableItems.getSlots() - getEmptySlots(tableItems);
 
         while (tableIndex < tableItems.getSlots() && meal.getCount() > 0) {
-            tableItems.setStackInSlot(tableIndex,meal.split(1));
+            tableItems.insertItem(tableIndex, meal.split(1), false);
             tableIndex++;
             request.toServe.split(1);
             table.refresh();
@@ -227,7 +228,7 @@ public class MaidServeMealTask extends MaidTickRateTask implements IStep {
         }
     }
 
-    private static int getEmptySlots(ItemStackHandler itemStackHandler) {
+    private static int getEmptySlots(IItemHandler itemStackHandler) {
         int count = 0;
         for (int i = 0;i < itemStackHandler.getSlots();i++)
             if (itemStackHandler.getStackInSlot(i).isEmpty())

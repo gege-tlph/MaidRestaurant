@@ -21,7 +21,7 @@ import net.minecraft.world.entity.ai.behavior.PositionTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
+import cn.sh1rocu.touhoulittlemaid.util.itemhandler.IItemHandler;
 
 import java.util.*;
 
@@ -72,7 +72,7 @@ public class MaidGetFromStorageTask extends MaidCheckRateTask implements IStep {
 
     protected boolean search(ServerLevel level, EntityMaid maid) {
         BlockPos center = BehaviorUtils.getSearchPos(maid);
-        int searchRange = (int)maid.getRestrictRadius();
+        int searchRange = (int)maid.searchRadius();
         List<BlockPos> foundStorages = SearchUtils.search(center, searchRange, verticalSearchRange, (pos)->{
             IItemHandler handler = MaidStorages.tryGetHandler(level,pos);
             return handler != null && containsRequired(level,maid,handler);
@@ -88,7 +88,7 @@ public class MaidGetFromStorageTask extends MaidCheckRateTask implements IStep {
     protected boolean containsRequired(ServerLevel level, EntityMaid maid, IItemHandler itemHandler) {
         CookRequest request = Objects.requireNonNull((CookRequest) RequestManager.peek(maid,CookRequest.TYPE));
         ICookTask iCookTask = CookTasks.getTask(request.type);
-        List<StackPredicate> required = iCookTask.getIngredients(level.getRecipeManager().byKey(request.id).get(),level);
+        List<StackPredicate> required = iCookTask.getIngredients(RecipeAccess.require(level, request.id),level);
         List<ItemStack> handler = ItemHandlerUtils.toStacks(maid.getAvailableInv(false));
 
         Optional<PositionTracker> cached = maid.getBrain().getMemory(ModEntities.CACHED_WORK_BLOCK.get());
@@ -121,7 +121,7 @@ public class MaidGetFromStorageTask extends MaidCheckRateTask implements IStep {
 
         CookRequest request = Objects.requireNonNull((CookRequest) RequestManager.peek(maid,CookRequest.TYPE));
         ICookTask iCookTask = CookTasks.getTask(request.type);
-        List<StackPredicate> required = iCookTask.getIngredients(level.getRecipeManager().byKey(request.id).get(),level);
+        List<StackPredicate> required = iCookTask.getIngredients(RecipeAccess.require(level, request.id),level);
         List<ItemStack> stacks = ItemHandlerUtils.toStacks(maid.getAvailableInv(false));
 
         Optional<PositionTracker> cached = maid.getBrain().getMemory(ModEntities.CACHED_WORK_BLOCK.get());
