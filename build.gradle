@@ -39,12 +39,14 @@ loom {
         client {
             client()
             setConfigName("Fabric Client")
-            runDir("run")
+            // Keep client-only runtime mods (for example IMBlocker) out of the
+            // dedicated-server instance entirely.
+            runDir("run/client")
         }
         server {
             server()
             setConfigName("Fabric Server")
-            runDir("run")
+            runDir("run/server")
         }
         datagen {
             server()

@@ -51,6 +51,22 @@ The complete development modpack reaches the main menu after resource and
 renderer initialization. The development account emits expected Mojang/Realms
 401 warnings, but those do not prevent offline client startup.
 
+## Development instances
+
+- `run/client` is the client instance. Maid Restaurant is supplied from the
+  Loom development classes; TLM, Kaleidoscope Cookery, Farmers Delight,
+  Patchouli, Fiber, and Forge Config API Port are supplied by
+  `modLocalRuntime`.
+- `run/client/mods` contains IMBlocker 6.1.4 for Fabric
+  (`1.21.9`-`1.21.11`) as a client-only input-method compatibility mod.
+- `run/server` is the dedicated-server instance. It uses the common runtime
+  dependency set and does not contain IMBlocker.
+
+The split run directories are intentional: copying the built Maid Restaurant
+JAR into the client `mods` directory would duplicate the mod already supplied
+by Loom, while sharing one `mods` directory would expose client-only utilities
+to the server instance.
+
 ## Migrated architecture
 
 - NeoForge mod/event entrypoints were replaced with Fabric initializers and
