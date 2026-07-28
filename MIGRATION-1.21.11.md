@@ -121,15 +121,22 @@ active 1.21.11 build.
 - The client ordering/cook/serve screens now compile against the 1.21.11
   input and `GuiGraphics` APIs, and server-authoritative payloads route to
   them. In-world interaction still needs a gameplay pass.
-- The ordering screen does not resolve recipes on the client. Server-side
-  order handling now resolves the authoritative output and serializes an item
-  id/count snapshot on `CookRequest`, which the client card renders directly.
-  This keeps recipe lookup server-authoritative while preserving the existing
-  screen behavior.
+- The ordering screen does not resolve recipes on the client. Screen opening
+  serializes recipe id, type, and display-result summaries into the S2C
+  payload. Server-side order handling resolves the authoritative output and
+  serializes an item id/count snapshot on `CookRequest`, which the client card
+  renders directly. This keeps recipe lookup server-authoritative while
+  preserving the existing screen behavior.
+- Custom GUI textures use the 1.21.11 `RenderPipelines.GUI_TEXTURED` blit
+  overload; calling the old resource-first overload now binds normalized quad
+  coordinates and produces an oversized tiled interface.
 - `RestaurantConfig` now persists `sit_while_cooking` and
   `give_patchouli_book` in `config/maid_restaurant.json`.
 - Patchouli book delivery is implemented as an optional Fabric-side login
   reward and uses the registered `patchouli:book` data component.
+- The Patchouli guide model has both the legacy baked model and the 1.21.11
+  `assets/<namespace>/items` definition required by Patchouli's dynamic book
+  item model and index icon.
 - Fabric datagen now has a real entrypoint and writes the 1.21.11 item-model
   definitions plus the block/item tags to its configured output directory.
 - `OrderItem` now has a persisted/networked request-state component; no gameplay

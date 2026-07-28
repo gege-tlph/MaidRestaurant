@@ -40,7 +40,7 @@ public class OrderMenuItem extends Item {
         if (!player.isSecondaryUseActive() && !selection.menu.isEmpty()) {
             if (player instanceof ServerPlayer serverPlayer) {
                 NetworkHandler.sendToPlayer(serverPlayer,
-                        new OpenOrderingScreenPayload(EncodeUtils.encode(selection.menu)));
+                        OpenOrderingScreenPayload.from(EncodeUtils.encode(selection.menu), level));
             }
             selection.menu.clear();
             player.setAttached(BlockSelection.ATTACHMENT, selection);

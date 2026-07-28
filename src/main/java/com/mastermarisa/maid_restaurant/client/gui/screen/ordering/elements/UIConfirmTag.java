@@ -8,6 +8,7 @@ import com.mastermarisa.maid_restaurant.client.gui.screen.ordering.OrderingScree
 import com.mastermarisa.maid_restaurant.network.SendOrderPayload;
 import com.mastermarisa.maid_restaurant.utils.CookTasks;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
@@ -141,7 +142,7 @@ public class UIConfirmTag extends UIElement {
         protected void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY) {
             super.render(graphics, mouseX, mouseY);
             if (!screen.orders.isEmpty()) {
-                graphics.blit(texture, getMinX(), getMinY(), 0,0,11,7,11,7);
+                graphics.blit(RenderPipelines.GUI_TEXTURED, texture, getMinX(), getMinY(), 0,0,11,7,11,7);
             }
         }
 

@@ -4,6 +4,7 @@ import com.mastermarisa.maid_restaurant.MaidRestaurant;
 import com.mastermarisa.maid_restaurant.client.gui.base.UIButton;
 import com.mastermarisa.maid_restaurant.client.gui.screen.ordering.OrderingScreen;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
@@ -29,7 +30,7 @@ public class UIOrderButton extends UIButton {
             int x = frame.contains(mouseX,mouseY) ? 48 : 32;
             int y = 224;
 
-            graphics.blit(texture, getMinX(), getMinY(), x, y, width, height,161,256);
+            graphics.blit(RenderPipelines.GUI_TEXTURED, texture, getMinX(), getMinY(), x, y, width, height,161,256);
         }
     }
 }

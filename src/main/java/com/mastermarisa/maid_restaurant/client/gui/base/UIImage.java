@@ -1,6 +1,7 @@
 package com.mastermarisa.maid_restaurant.client.gui.base;
 
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
 
 import java.awt.*;
 
@@ -22,7 +23,7 @@ public class UIImage extends UIElement {
         super.render(graphics,mouseX,mouseY);
         int imageWidth = this.data.partOfTexture.width;
         int imageHeight = this.data.partOfTexture.height;
-        graphics.blit(this.data.textureLocation,
+        graphics.blit(RenderPipelines.GUI_TEXTURED, this.data.textureLocation,
                 this.frame.x + (int)Math.floor((double)(this.frame.width - imageWidth) / 2.0F),
                 this.frame.y + (int)Math.floor((double)(this.frame.height - imageHeight) / 2.0F),
                 this.data.partOfTexture.x, this.data.partOfTexture.y,

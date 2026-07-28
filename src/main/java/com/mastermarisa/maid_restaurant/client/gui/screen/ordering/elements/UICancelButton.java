@@ -4,6 +4,7 @@ import com.mastermarisa.maid_restaurant.MaidRestaurant;
 import com.mastermarisa.maid_restaurant.client.gui.base.UIButton;
 import com.mastermarisa.maid_restaurant.client.gui.screen.ordering.OrderingScreen;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,7 +25,7 @@ public class UICancelButton extends UIButton {
     protected void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY) {
         super.render(graphics,mouseX,mouseY);
         if (screen.orders.size() > index) {
-            graphics.blit(texture, getMinX(), getMinY(), 0,0,7,7,7,7);
+            graphics.blit(RenderPipelines.GUI_TEXTURED, texture, getMinX(), getMinY(), 0,0,7,7,7,7);
         }
     }
 }

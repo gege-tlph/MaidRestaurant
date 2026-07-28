@@ -38,6 +38,7 @@ public class OrderingScreen extends Screen implements IPageable {
 
     public final Player player;
     public final List<BlockPos> targets;
+    private final List<RecipeData> recipes;
     public List<Order> orders;
     public RecipeType<?> curType;
     private int curPageNum;
@@ -49,10 +50,11 @@ public class OrderingScreen extends Screen implements IPageable {
     private UILabel pageNumLabel;
     private final UICookTypeSelector selector;
 
-    public OrderingScreen(Player player, List<BlockPos> targets) {
+    public OrderingScreen(Player player, List<BlockPos> targets, List<RecipeData> recipes) {
         super(Component.empty());
         this.player = player;
         this.targets = targets;
+        this.recipes = List.copyOf(recipes);
         this.pageMap = new ConcurrentHashMap<>();
         this.orders = new ArrayList<>();
 
@@ -136,8 +138,8 @@ public class OrderingScreen extends Screen implements IPageable {
         initPages(text);
     }
 
-    public static void open(Player player, List<BlockPos> targets) {
-        mc.setScreen(new OrderingScreen(player,targets));
+    public static void open(Player player, List<BlockPos> targets, List<RecipeData> recipes) {
+        mc.setScreen(new OrderingScreen(player, targets, recipes));
     }
 
     public void close() {
@@ -211,7 +213,9 @@ public class OrderingScreen extends Screen implements IPageable {
 
     public void initPages(String filter) {
         for (ICookTask iCookTask : CookTasks.getRegistered()) {
-            List<RecipeData> data = filter(iCookTask.getAllRecipeData(player.level()),filter);
+            List<RecipeData> data = filter(recipes.stream()
+                    .filter(recipe -> recipe.type == iCookTask.getType())
+                    .toList(), filter);
             List<RecipePage> recipePages = new ArrayList<>();
             for (int i = 0;i < data.size();i += 14) {
                 List<RecipeData> pageData = new ArrayList<>();
