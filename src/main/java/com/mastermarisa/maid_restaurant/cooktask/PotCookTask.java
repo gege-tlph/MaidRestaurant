@@ -15,6 +15,7 @@ import com.mastermarisa.maid_restaurant.request.CookRequest;
 import com.mastermarisa.maid_restaurant.utils.BlockUsageManager;
 import com.mastermarisa.maid_restaurant.utils.ItemHandlerUtils;
 import com.mastermarisa.maid_restaurant.utils.RecipeAccess;
+import com.mastermarisa.maid_restaurant.utils.SearchUtils;
 import com.mastermarisa.maid_restaurant.utils.component.RecipeData;
 import com.mastermarisa.maid_restaurant.utils.component.StackPredicate;
 import net.minecraft.core.BlockPos;
@@ -96,8 +97,28 @@ public class PotCookTask implements ICookTask {
         BlockPos blockPos = maid.getBrainSearchPos();
         PoiManager poiManager = level.getPoiManager();
         int range = (int) maid.searchRadius();
-        return poiManager.getInRange((type)-> type.value().equals(ModPoi.POT), blockPos, range, PoiManager.Occupancy.ANY)
-                .map(PoiRecord::getPos).filter((pos)-> BlockUsageManager.getUserCount(pos) <= 0).min(Comparator.comparingDouble(pos -> pos.distSqr(maid.blockPosition()))).orElse(null);
+        BlockPos poiResult = poiManager.getInRange((type)-> type.value().equals(ModPoi.POT), blockPos, range, PoiManager.Occupancy.ANY)
+                .map(PoiRecord::getPos)
+                .filter(pos -> isAvailablePot(level, maid, pos))
+                .min(Comparator.comparingDouble(pos -> pos.distSqr(maid.blockPosition())))
+                .orElse(null);
+        if (poiResult != null) {
+            return poiResult;
+        }
+
+        // Keep cooking usable when the block entity is present but its POI was
+        // not restored yet after a world upgrade or reload.
+        return SearchUtils.search(blockPos, horizontalSearchRange, verticalSearchRange,
+                        pos -> isAvailablePot(level, maid, pos))
+                .stream()
+                .min(Comparator.comparingDouble(pos -> pos.distSqr(maid.blockPosition())))
+                .orElse(null);
+    }
+
+    private boolean isAvailablePot(ServerLevel level, EntityMaid maid, BlockPos pos) {
+        return level.getBlockEntity(pos) instanceof PotBlockEntity pot
+                && pot.hasHeatSource(level)
+                && BlockUsageManager.getUserCount(pos) <= 0;
     }
 
     @Override

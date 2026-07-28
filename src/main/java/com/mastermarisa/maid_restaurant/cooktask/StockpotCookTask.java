@@ -16,6 +16,7 @@ import com.mastermarisa.maid_restaurant.request.CookRequest;
 import com.mastermarisa.maid_restaurant.utils.BlockUsageManager;
 import com.mastermarisa.maid_restaurant.utils.ItemHandlerUtils;
 import com.mastermarisa.maid_restaurant.utils.RecipeAccess;
+import com.mastermarisa.maid_restaurant.utils.SearchUtils;
 import com.mastermarisa.maid_restaurant.utils.component.RecipeData;
 import com.mastermarisa.maid_restaurant.utils.component.StackPredicate;
 import net.minecraft.core.BlockPos;
@@ -97,8 +98,29 @@ public class StockpotCookTask implements ICookTask {
         BlockPos blockPos = maid.getBrainSearchPos();
         PoiManager poiManager = level.getPoiManager();
         int range = (int) maid.searchRadius();
-        return poiManager.getInRange((type)-> type.value().equals(ModPoi.STOCKPOT), blockPos, range, PoiManager.Occupancy.ANY)
-                .map(PoiRecord::getPos).filter((pos)-> BlockUsageManager.getUserCount(pos) <= 0).min(Comparator.comparingDouble(pos -> pos.distSqr(maid.blockPosition()))).orElse(null);
+        BlockPos poiResult = poiManager.getInRange((type)-> type.value().equals(ModPoi.STOCKPOT), blockPos, range, PoiManager.Occupancy.ANY)
+                .map(PoiRecord::getPos)
+                .filter(pos -> isAvailableStockpot(level, maid, pos))
+                .min(Comparator.comparingDouble(pos -> pos.distSqr(maid.blockPosition())))
+                .orElse(null);
+        if (poiResult != null) {
+            return poiResult;
+        }
+
+        // A stockpot can exist before its POI is registered (for example after a
+        // hot-reload or when a world is upgraded). Fall back to the actual block
+        // entity so the maid can still recover and use the kitchen.
+        return SearchUtils.search(blockPos, horizontalSearchRange, verticalSearchRange,
+                        pos -> isAvailableStockpot(level, maid, pos))
+                .stream()
+                .min(Comparator.comparingDouble(pos -> pos.distSqr(maid.blockPosition())))
+                .orElse(null);
+    }
+
+    private boolean isAvailableStockpot(ServerLevel level, EntityMaid maid, BlockPos pos) {
+        return level.getBlockEntity(pos) instanceof StockpotBlockEntity pot
+                && pot.hasHeatSource(level)
+                && BlockUsageManager.getUserCount(pos) <= 0;
     }
 
     @Override
