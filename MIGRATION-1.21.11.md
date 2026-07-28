@@ -135,11 +135,14 @@ active 1.21.11 build.
 - `OrderItem` now has a persisted/networked request-state component; no gameplay
   producer currently attaches that component, so the default item remains the
   no-requests model.
-- Farmers Delight Refabricated 3.4.9 has an upstream 1.21.11 client-startup
-  defect: its bundled early-riser does not add
-  `FARMERSDELIGHT_COOKING`, although the client initializer validates it.
-  A client-only compatibility Mixin handles that discarded validation result
-  and allows the full modpack to reach the main menu.
+- Farmers Delight Refabricated 3.4.9 has an upstream 1.21.11 enum-extension
+  defect: its bundled early-riser does not add `FARMERSDELIGHT_COOKING`.
+  Compatibility Mixins provide safe crafting-category fallbacks for both the
+  client initializer and the common recipe-book synchronization path, allowing
+  the full modpack to reach the main menu and enter an integrated-server world.
+- Universal cooking and guide-book recipe ingredients use the 1.21.11
+  string-or-array ingredient codec rather than the removed `{item: ...}` and
+  `{tag: ...}` object forms.
 
 ## Manual release verification
 

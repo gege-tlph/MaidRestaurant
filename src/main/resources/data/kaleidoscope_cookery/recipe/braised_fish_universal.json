@@ -1,27 +1,13 @@
 {
   "type": "kaleidoscope_cookery:pot",
-  "carrier": {
-    "item": "minecraft:bowl"
-  },
+  "carrier": "minecraft:bowl",
   "ingredients": [
-    {
-      "tag": "maid_restaurant:braised_fish_ingredient"
-    },
-    {
-      "tag": "maid_restaurant:braised_fish_ingredient"
-    },
-    {
-      "tag": "maid_restaurant:braised_fish_ingredient"
-    },
-    {
-      "tag": "maid_restaurant:braised_fish_ingredient"
-    },
-    {
-      "tag": "maid_restaurant:braised_fish_ingredient"
-    },
-    {
-      "tag": "maid_restaurant:braised_fish_ingredient"
-    }
+    "#maid_restaurant:braised_fish_ingredient",
+    "#maid_restaurant:braised_fish_ingredient",
+    "#maid_restaurant:braised_fish_ingredient",
+    "#maid_restaurant:braised_fish_ingredient",
+    "#maid_restaurant:braised_fish_ingredient",
+    "#maid_restaurant:braised_fish_ingredient"
   ],
   "result": {
     "count": 1,

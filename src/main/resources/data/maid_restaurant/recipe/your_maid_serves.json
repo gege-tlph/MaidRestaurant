@@ -10,15 +10,9 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    {
-      "tag": "c:dyes/cyan"
-    },
-    {
-      "tag": "c:feathers"
-    },
-    {
-      "item": "minecraft:book"
-    }
+    "#c:dyes/cyan",
+    "#c:feathers",
+    "minecraft:book"
   ],
   "result": {
     "components": {
