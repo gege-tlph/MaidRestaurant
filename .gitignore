@@ -3,6 +3,7 @@
 .gradle/
 build/
 run/
+MIGRATION-1.21.11.md
 
 # Log file
 *.log

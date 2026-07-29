@@ -16,6 +16,7 @@ import com.mastermarisa.maid_restaurant.request.CookRequest;
 import com.mastermarisa.maid_restaurant.utils.BlockUsageManager;
 import com.mastermarisa.maid_restaurant.utils.ItemHandlerUtils;
 import com.mastermarisa.maid_restaurant.utils.RecipeAccess;
+import com.mastermarisa.maid_restaurant.utils.RequestManager;
 import com.mastermarisa.maid_restaurant.utils.SearchUtils;
 import com.mastermarisa.maid_restaurant.utils.component.RecipeData;
 import com.mastermarisa.maid_restaurant.utils.component.StackPredicate;
@@ -81,12 +82,17 @@ public class StockpotCookTask implements ICookTask {
             if (pot.getSoupBase() != null)
                 ans.add(pot.getSoupBase().getDisplayStack());
             if (pot.getStatus() == 3) {
-                StockpotRecipe recipe = pot.recipe.value();
-                recipe.getIngredients().stream().filter(i -> i.items().findAny().isPresent())
-                        .forEach(s -> s.items().findFirst().ifPresent(item -> ans.add(new ItemStack(item.value()))));
-                recipe.carrier().items().findFirst().ifPresent(item ->
-                        ans.add(new ItemStack(item.value(), recipe.result().getCount() - pot.getTakeoutCount())));
-                ans.add(SoupBaseManager.getSoupBase(recipe.soupBase()).getDisplayStack());
+                CookRequest request = (CookRequest) RequestManager.peek(maid, CookRequest.TYPE);
+                RecipeHolder<? extends Recipe<?>> holder = request == null || request.id == null
+                        ? null
+                        : RecipeAccess.byId(level, request.id).orElse(null);
+                if (holder != null && holder.value() instanceof StockpotRecipe recipe) {
+                    recipe.getIngredients().stream().filter(i -> i.items().findAny().isPresent())
+                            .forEach(s -> s.items().findFirst().ifPresent(item -> ans.add(new ItemStack(item.value()))));
+                    recipe.carrier().items().findFirst().ifPresent(item ->
+                            ans.add(new ItemStack(item.value(), recipe.result().getCount() - pot.getTakeoutCount())));
+                    ans.add(SoupBaseManager.getSoupBase(recipe.soupBase()).getDisplayStack());
+                }
             }
         }
 

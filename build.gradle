@@ -105,10 +105,12 @@ dependencies {
     modLocalRuntime "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:21.11.1"
 }
 
+def resourceVersion = version.toString()
+
 processResources {
-    inputs.property "version", project.version
+    inputs.property "version", resourceVersion
     filesMatching("fabric.mod.json") {
-        expand "version": project.version
+        expand "version": resourceVersion
     }
 }
 

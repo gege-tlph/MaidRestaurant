@@ -12,6 +12,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
 import net.minecraft.world.entity.ai.behavior.PositionTracker;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
@@ -20,10 +22,14 @@ import java.util.Optional;
 public class MaidStateManager {
     public static CookState cookState(EntityMaid maid, Level level) {
         CookRequest request = (CookRequest) RequestManager.peek(maid,CookRequest.TYPE);
-        if (request == null || !request.checkEnableConditions((ServerLevel) level,maid)) return CookState.IDLE;
+        if (request == null || request.id == null || request.type == null) return CookState.IDLE;
 
         ICookTask iCookTask = CookTasks.getTask(request.type);
-        List<StackPredicate> required = iCookTask.getIngredients(RecipeAccess.require(level, request.id),level);
+        RecipeHolder<? extends Recipe<?>> recipe = RecipeAccess.byId(level, request.id).orElse(null);
+        if (iCookTask == null || recipe == null || recipe.value().getType() != request.type) return CookState.IDLE;
+        if (!request.checkEnableConditions((ServerLevel) level,maid)) return CookState.IDLE;
+
+        List<StackPredicate> required = iCookTask.getIngredients(recipe,level);
         required.addAll(iCookTask.getKitchenWares());
         List<ItemStack> handler = ItemHandlerUtils.toStacks(maid.getAvailableInv(false));
         Optional<PositionTracker> cached = maid.getBrain().getMemory(ModEntities.CACHED_WORK_BLOCK.get());

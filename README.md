@@ -72,8 +72,6 @@ Windows PowerShell：
 
 客户端专用模组放在 `run/client/mods`；不要把 IMBlocker 或其他客户端专用模组复制到 `run/server/mods`。
 
-更完整的迁移说明、运行实例和验证记录见 [`MIGRATION-1.21.11.md`](MIGRATION-1.21.11.md)。
-
 ## 迁移状态
 
 Fabric 1.21.11 的主逻辑、客户端界面、网络 payload、TLM 任务扩展、Patchouli 集成以及 Farmers Delight 兼容已经迁移并可构建。
@@ -94,4 +92,4 @@ Fabric 1.21.11 的主逻辑、客户端界面、网络 payload、TLM 任务扩�
 
 Maid Restaurant is a Fabric 1.21.11 addon for Touhou Little Maid. It adds cook and waiter maid tasks, restaurant orders, table targeting, Kaleidoscope Cookery integration, optional Patchouli documentation, and optional Farmers Delight Refabricated compatibility.
 
-The active development branch is `port/1.21.11-fabric`. Bakeries compatibility is archived and excluded from the active build. See [`MIGRATION-1.21.11.md`](MIGRATION-1.21.11.md) for migration details and development-instance notes.
+The active development branch is `port/1.21.11-fabric`. Bakeries compatibility is archived and excluded from the active build.
