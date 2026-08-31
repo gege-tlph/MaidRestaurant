@@ -28,7 +28,7 @@ jobs:
 
       # Maid Restaurant compiles against the unofficial TouhouLittleMaid Fabric
       # port, which is not published to a Maven repository. Fetch the pinned
-      # release asset and let build.gradle's TLM_DEV_JAR hook point at it.
+      # release asset into libs/, where build.gradle looks for it by default.
       - name: Fetch TouhouLittleMaid dev jar
         env:
           TLM_JAR: touhoulittlemaid-fabric-0.8.4-neo1.5.3+mc1.21.11.jar
@@ -38,6 +38,4 @@ jobs:
           curl -fsSL -o "libs/$TLM_JAR" "$TLM_URL"
 
       - name: Build with Gradle
-        env:
-          TLM_DEV_JAR: ${{ github.workspace }}/libs/touhoulittlemaid-fabric-0.8.4-neo1.5.3+mc1.21.11.jar
         run: ./gradlew build

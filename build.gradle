@@ -67,6 +67,15 @@ sourceSets {
     }
 }
 
+def tlmJarName = "touhoulittlemaid-fabric-0.8.4-neo1.5.3+mc1.21.11.jar"
+def tlmJarUrl = "https://github.com/gege-tlph/TouhouLittleMaid-Tsumugi/releases/download/v0.8.4%2Bmc1.21.11/touhoulittlemaid-fabric-0.8.4-neo1.5.3%2Bmc1.21.11.jar"
+def tlmJar = file(providers.environmentVariable("TLM_DEV_JAR")
+        .orElse("${rootProject.projectDir}/libs/${tlmJarName}").get())
+def tlmMissingHint = """TouhouLittleMaid dev jar not found at ${tlmJar}
+  Set TLM_DEV_JAR to your own build of the port, or fetch the pinned release:
+  curl -fsSL --create-dirs -o "libs/${tlmJarName}" ${tlmJarUrl}
+"""
+
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings loom.officialMojangMappings()
@@ -74,14 +83,16 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     compileOnly "com.google.code.findbugs:jsr305:3.0.2"
 
-    // Local development contract for the completed Fabric 1.21.11 TLM port.
-    // This path is intentionally optional for published builds; set TLM_DEV_JAR
-    // to another jar when working outside the shared workspace.
-    def tlmJar = providers.environmentVariable("TLM_DEV_JAR")
-            .orElse("${rootProject.projectDir}/../../claude/build/libs/touhoulittlemaid-fabric-0.8.4-neo1.5.3+mc1.21.11.jar")
-    modCompileOnly files(tlmJar.get())
-    if (file(tlmJar.get()).exists()) {
-        modLocalRuntime files(tlmJar.get())
+    // The unofficial TouhouLittleMaid Fabric port is not published to a Maven
+    // repository, so the jar is taken from TLM_DEV_JAR when that is set and
+    // from libs/ otherwise. The CI workflow downloads the pinned release asset
+    // into libs/; locally, drop the jar there or point TLM_DEV_JAR at your own
+    // build of the port.
+    if (tlmJar.exists()) {
+        modCompileOnly files(tlmJar)
+        modLocalRuntime files(tlmJar)
+    } else {
+        logger.warn("WARNING: ${tlmMissingHint}")
     }
 
     modCompileOnly("vazkii.patchouli:Patchouli:1.21.11-94.1-FABRIC") {
@@ -117,6 +128,11 @@ processResources {
 tasks.withType(JavaCompile).configureEach {
     options.encoding = "UTF-8"
     options.release = 21
+    doFirst {
+        if (!tlmJar.exists()) {
+            throw new GradleException(tlmMissingHint)
+        }
+    }
 }
 
 java {
