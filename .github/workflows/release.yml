@@ -1,0 +1,168 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+*'
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
+  # Validation only. A dispatch runs on a branch, so there is no tag for the
+  # version guard to check and no release to attach files to: it resolves the
+  # CurseForge metadata and stops, and never uploads or publishes anything.
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      # gradlew is mode 100644 in the index, so the runner cannot execute it.
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+
+      # Same pinned dev jar as the build workflow: the unofficial TouhouLittleMaid
+      # Fabric port is not published to a Maven repository.
+      - name: Fetch TouhouLittleMaid dev jar
+        env:
+          TLM_JAR: touhoulittlemaid-fabric-0.8.8-neo1.5.3+mc1.21.11.jar
+          TLM_URL: https://github.com/gege-tlph/TouhouLittleMaid-Tsumugi/releases/download/v0.8.8%2Bmc1.21.11/touhoulittlemaid-fabric-0.8.8-neo1.5.3%2Bmc1.21.11.jar
+        run: |
+          mkdir -p libs
+          curl -fsSL -o "libs/$TLM_JAR" "$TLM_URL"
+
+      - name: Resolve release metadata
+        id: meta
+        env:
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          version=$(sed -n 's/^mod_version=//p' gradle.properties)
+          if [ -z "$version" ]; then
+            echo "::error::mod_version missing from gradle.properties"
+            exit 1
+          fi
+
+          # The version comes from gradle.properties, never from the tag. A tag
+          # that disagrees would publish the wrong version number, and pushing
+          # one branch's tag onto another is an easy slip, so fail loudly.
+          if [ "$REF_TYPE" = "tag" ]; then
+            if [ "${REF_NAME#v}" != "$version" ]; then
+              echo "::error::tag ${REF_NAME} does not match mod_version ${version}"
+              exit 1
+            fi
+          fi
+
+          changelog="docs/curseforge/changelog/${version}.md"
+          if [ ! -f "$changelog" ]; then
+            echo "::error::missing changelog ${changelog}"
+            exit 1
+          fi
+
+          case "$version" in
+            *alpha*) release_type=alpha ;;
+            *beta*)  release_type=beta ;;
+            *)       release_type=release ;;
+          esac
+
+          {
+            echo "version=${version}"
+            echo "jar=build/libs/maid_restaurant-${version}.jar"
+            echo "sources_jar=build/libs/maid_restaurant-${version}-sources.jar"
+            echo "changelog=${changelog}"
+            echo "release_type=${release_type}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Verify build artifacts
+        env:
+          JAR: ${{ steps.meta.outputs.jar }}
+          SOURCES_JAR: ${{ steps.meta.outputs.sources_jar }}
+        run: |
+          for artifact in "$JAR" "$SOURCES_JAR"; do
+            if [ ! -f "$artifact" ]; then
+              echo "::error::missing build artifact ${artifact}"
+              exit 1
+            fi
+          done
+          # BSD-3-Clause clause 2 requires the notice in binary distributions.
+          if ! unzip -l "$JAR" | grep -q 'LICENSE_maid_restaurant.txt'; then
+            echo "::error::LICENSE is missing from ${JAR}"
+            exit 1
+          fi
+
+      - name: Upload to CurseForge
+        env:
+          CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
+          CURSEFORGE_PROJECT_ID: ${{ vars.CURSEFORGE_PROJECT_ID }}
+          REF_TYPE: ${{ github.ref_type }}
+          JAR: ${{ steps.meta.outputs.jar }}
+          VERSION: ${{ steps.meta.outputs.version }}
+          RELEASE_TYPE: ${{ steps.meta.outputs.release_type }}
+          CHANGELOG: ${{ steps.meta.outputs.changelog }}
+        run: |
+          # A half-configured project is a mistake, not a state to tolerate: it
+          # would otherwise upload nothing while the job stays green.
+          if [ -n "$CURSEFORGE_TOKEN" ] && [ -z "$CURSEFORGE_PROJECT_ID" ]; then
+            echo "::error::CURSEFORGE_TOKEN is set but the CURSEFORGE_PROJECT_ID variable is not"
+            exit 1
+          fi
+          if [ -z "$CURSEFORGE_TOKEN" ] && [ -n "$CURSEFORGE_PROJECT_ID" ]; then
+            echo "::error::CURSEFORGE_PROJECT_ID is set but the CURSEFORGE_TOKEN secret is not"
+            exit 1
+          fi
+          if [ -z "$CURSEFORGE_TOKEN" ]; then
+            echo "::warning::CurseForge is not configured, so NOTHING was uploaded there. Set the CURSEFORGE_TOKEN secret and the CURSEFORGE_PROJECT_ID variable."
+            echo ':warning: **CurseForge upload skipped** — not configured.' >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          # Anything that is not a tag build only validates the metadata.
+          dry_run=""
+          if [ "$REF_TYPE" != "tag" ]; then
+            dry_run="--dry-run"
+            echo "::notice::not a tag build, resolving CurseForge metadata only"
+          fi
+
+          python3 .github/scripts/curseforge_upload.py "$JAR" \
+            --release-type "$RELEASE_TYPE" \
+            --display-name "Maid Restaurant: Tsumugi $VERSION" \
+            --changelog-file "$CHANGELOG" \
+            $dry_run
+
+          if [ -z "$dry_run" ]; then
+            echo ":white_check_mark: **Uploaded to CurseForge** — $VERSION" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Create GitHub release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REF_NAME: ${{ github.ref_name }}
+          VERSION: ${{ steps.meta.outputs.version }}
+          CHANGELOG: ${{ steps.meta.outputs.changelog }}
+          JAR: ${{ steps.meta.outputs.jar }}
+          SOURCES_JAR: ${{ steps.meta.outputs.sources_jar }}
+        run: |
+          gh release create "$REF_NAME" \
+            --title "Maid Restaurant: Tsumugi $VERSION" \
+            --notes-file "$CHANGELOG" \
+            "$JAR" "$SOURCES_JAR"
+          echo ":white_check_mark: **GitHub release created** — $REF_NAME" >> "$GITHUB_STEP_SUMMARY"

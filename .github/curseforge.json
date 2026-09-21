@@ -1,0 +1,18 @@
+{
+  "_comment": "Tag names and project relations used when uploading to CurseForge. Names are resolved to numeric ids against https://minecraft.curseforge.com/api/game/versions at upload time, so they must match CurseForge's tag names exactly. Environment tags (Client/Server) are mandatory for Minecraft mods since 2026-07-15.",
+  "gameVersions": [
+    "1.21.11",
+    "Fabric",
+    "Client",
+    "Server",
+    "Java 21"
+  ],
+  "relations": {
+    "projects": [
+      { "slug": "fabric-api", "type": "requiredDependency" },
+      { "slug": "touhou-little-maid-tsumugi", "type": "requiredDependency" },
+      { "slug": "kaleidoscope-cookery-refabricated", "type": "requiredDependency" },
+      { "slug": "farmers-delight-refabricated", "type": "optionalDependency" }
+    ]
+  }
+}
