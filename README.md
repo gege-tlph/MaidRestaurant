@@ -54,7 +54,7 @@ English: An unofficial Fabric 1.21.11 port of Maid Restaurant, providing automat
 需要 JDK 21。[东方小女仆 Tsumugi](https://github.com/gege-tlph/TouhouLittleMaid-Tsumugi) 未发布到 Maven 仓库，首次构建前先把它的 jar 放进 `libs/`：
 
 ```bash
-curl -fsSL --create-dirs -o "libs/touhoulittlemaid-fabric-0.8.4-neo1.5.3+mc1.21.11.jar" https://github.com/gege-tlph/TouhouLittleMaid-Tsumugi/releases/download/v0.8.4%2Bmc1.21.11/touhoulittlemaid-fabric-0.8.4-neo1.5.3%2Bmc1.21.11.jar
+curl -fsSL --create-dirs -o "libs/touhoulittlemaid-fabric-0.8.8-neo1.5.3+mc1.21.11.jar" https://github.com/gege-tlph/TouhouLittleMaid-Tsumugi/releases/download/v0.8.8%2Bmc1.21.11/touhoulittlemaid-fabric-0.8.8-neo1.5.3%2Bmc1.21.11.jar
 ```
 
 也可以用 `TLM_DEV_JAR` 环境变量指向自己构建的移植版 jar。然后运行：

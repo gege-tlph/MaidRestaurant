@@ -67,8 +67,8 @@ sourceSets {
     }
 }
 
-def tlmJarName = "touhoulittlemaid-fabric-0.8.4-neo1.5.3+mc1.21.11.jar"
-def tlmJarUrl = "https://github.com/gege-tlph/TouhouLittleMaid-Tsumugi/releases/download/v0.8.4%2Bmc1.21.11/touhoulittlemaid-fabric-0.8.4-neo1.5.3%2Bmc1.21.11.jar"
+def tlmJarName = "touhoulittlemaid-fabric-0.8.8-neo1.5.3+mc1.21.11.jar"
+def tlmJarUrl = "https://github.com/gege-tlph/TouhouLittleMaid-Tsumugi/releases/download/v0.8.8%2Bmc1.21.11/touhoulittlemaid-fabric-0.8.8-neo1.5.3%2Bmc1.21.11.jar"
 def tlmJar = file(providers.environmentVariable("TLM_DEV_JAR")
         .orElse("${rootProject.projectDir}/libs/${tlmJarName}").get())
 def tlmMissingHint = """TouhouLittleMaid dev jar not found at ${tlmJar}

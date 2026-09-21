@@ -8,23 +8,14 @@ import com.github.tartaricacid.touhoulittlemaid.init.InitEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.item.ItemStack;
-import cn.sh1rocu.touhoulittlemaid.util.itemhandler.CombinedInvWrapper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-
-import javax.annotation.Nullable;
-import java.util.Optional;
 
 @Mixin({MaidStealEdibleMoveBlockTask.class})
 public class MaidStealEdibleMoveBlockTaskMixin extends MaidMoveToBlockTask {
     @Shadow
     private final MemoryModuleType<MaidEdibleBlockAction> action;
-
-    @Shadow
-    @Nullable
-    private ItemStack placedStack;
 
     public MaidStealEdibleMoveBlockTaskMixin(float movementSpeed) {
         super(movementSpeed, 2);
@@ -38,15 +29,22 @@ public class MaidStealEdibleMoveBlockTaskMixin extends MaidMoveToBlockTask {
      */
     @Overwrite
     protected void start(ServerLevel worldIn, EntityMaid maid, long gameTimeIn) {
-        Optional<MaidEdibleBlockAction> memory = maid.getBrain().getMemory(this.action);
-        if (memory.isPresent() && memory.get() == MaidEdibleBlockAction.TRY_STEAL) {
-            CombinedInvWrapper inv = maid.getAvailableInv(true);
-            maid.getBrain().setMemory(this.action, MaidEdibleBlockAction.TRY_STEAL);
-        } else {
-            maid.getBrain().setMemory(this.action, MaidEdibleBlockAction.TRY_STEAL);
-        }
+        // Restaurant tables have to stay clear, so upstream's TRY_PLACE branch is
+        // dropped and the action always falls back to TRY_STEAL. Everything after
+        // that mirrors TouhouLittleMaid 0.8.8's start(): the steal attempt is
+        // gated on canSteal, and a search that found a target arms the hold so the
+        // maid stops re-picking a destination on every check.
+        maid.getBrain().setMemory(this.action, MaidEdibleBlockAction.TRY_STEAL);
 
-        this.searchForDestination(worldIn, maid);
+        if (MaidStealEdibleUseTaskInvoker.invokeCanSteal(maid)) {
+            this.searchForDestination(worldIn, maid);
+            armTargetHold(worldIn, maid);
+        }
+    }
+
+    @Shadow
+    private static void armTargetHold(ServerLevel worldIn, EntityMaid maid) {
+        throw new AssertionError();
     }
 
     @Shadow
