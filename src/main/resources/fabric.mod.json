@@ -2,11 +2,13 @@
   "schemaVersion": 1,
   "id": "maid_restaurant",
   "version": "${version}",
-  "name": "Maid Restaurant",
+  "name": "Maid Restaurant: Tsumugi",
   "description": "An addon mod designed to deliver a restaurant-style automatic experience with maids.",
   "authors": ["MasterMarisa"],
+  "contributors": ["gege-tlph"],
   "contact": {
-    "sources": "https://github.com/gege-tlph/MaidRestaurant"
+    "sources": "https://github.com/gege-tlph/MaidRestaurant",
+    "issues": "https://github.com/gege-tlph/MaidRestaurant/issues"
   },
   "license": "BSD-3-Clause",
   "icon": "logo.png",

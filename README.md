@@ -1,9 +1,9 @@
-# Maid Restaurant
+# Maid Restaurant: Tsumugi
 
 > [!IMPORTANT]
 > 本仓库是 [MasterMarisa/MaidRestaurant](https://github.com/MasterMarisa/MaidRestaurant) 的非官方维护 fork，面向 Minecraft 1.21.11 与 Fabric。其他 Minecraft 版本请优先使用上游项目。
 
-Maid Restaurant 是 [东方小女仆 Tsumugi](https://github.com/gege-tlph/TouhouLittleMaid-Tsumugi) 的附属模组，为女仆提供餐厅自动化能力：厨师女仆负责烹饪，服务女仆负责取餐并将成品送到指定桌位。
+Maid Restaurant: Tsumugi 是 [东方小女仆 Tsumugi](https://github.com/gege-tlph/TouhouLittleMaid-Tsumugi) 的附属模组，为女仆提供餐厅自动化能力：厨师女仆负责烹饪，服务女仆负责取餐并将成品送到指定桌位。
 
 English: An unofficial Fabric 1.21.11 port of Maid Restaurant, providing automated cooking and table-service workflows for Touhou Little Maid: Tsumugi.
 
