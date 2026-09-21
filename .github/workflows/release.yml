@@ -108,6 +108,15 @@ jobs:
             exit 1
           fi
 
+      # The upload step exits early when CurseForge is not configured yet, so
+      # nothing would otherwise prove the script and its metadata survive a clean
+      # checkout until the first real upload. Check that much without a token.
+      - name: Check the CurseForge uploader
+        run: |
+          python3 -c "import json,sys; json.load(open('.github/curseforge.json'))"
+          python3 .github/scripts/curseforge_upload.py --help > /dev/null
+          echo "uploader and metadata load cleanly"
+
       - name: Upload to CurseForge
         env:
           CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
