@@ -139,6 +139,23 @@ java {
     withSourcesJar()
 }
 
+// BSD-3-Clause clause 2 requires binary distributions to reproduce the
+// copyright notice, so ship the license inside every published jar.
+def licenseFileName = "LICENSE_${project.mod_id}.txt"
+def licenseFile = rootProject.file("LICENSE.txt")
+
+tasks.named("jar", Jar) {
+    from(licenseFile) {
+        rename { licenseFileName }
+    }
+}
+
+tasks.named("sourcesJar", Jar) {
+    from(licenseFile) {
+        rename { licenseFileName }
+    }
+}
+
 publishing {
     publications {
         create("mavenJava", MavenPublication) {
